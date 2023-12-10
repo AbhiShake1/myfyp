@@ -6,6 +6,7 @@ import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export function LoginJourneyForm() {
   return (
@@ -60,9 +61,11 @@ export function LoginJourneyForm() {
             </div>
           </CardContent>
         </Card>
-        <Button className="w-full" type="submit">
-          Register
-        </Button>
+        <Link href="/subscription/">
+          <Button className="w-full" type="submit">
+            Register
+          </Button>
+        </Link>
       </div>
     </div>
   )
