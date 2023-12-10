@@ -21,7 +21,7 @@ export function UserTable<T extends Record<string, any>>({ props }: { props: T[]
             <TableHeader>
               <TableRow>
                 {Object.keys(props[0]!).map((title) => {
-                  return <TableHead key={title} className="font-bold text-black">
+                  return <TableHead key={title} className="font-bold">
                     {toTitleCase(title)}
                   </TableHead>
                 })}
