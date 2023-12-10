@@ -5,7 +5,6 @@
  * @see https://v0.dev/t/j6tSza98reY
  */
 import { Button } from "@/components/ui/button"
-import { SignInButton } from "@clerk/nextjs"
 
 export function LoginForm() {
   return (
@@ -15,12 +14,10 @@ export function LoginForm() {
         <p className="text-gray-500 dark:text-gray-400">Login with your Google organization account</p>
       </div>
       <div className="space-y-4">
-        <SignInButton mode="modal">
-          <Button className="w-full" variant="outline" >
-            <ChromeIcon className={"w-4 h-4 mr-2"} />
-            Login with Google
-          </Button>
-        </SignInButton>
+        <Button className="w-full" variant="outline" >
+          <ChromeIcon className={"w-4 h-4 mr-2"} />
+          Login with Google
+        </Button>
       </div>
     </div>
   )
