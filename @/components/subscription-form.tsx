@@ -58,7 +58,9 @@ export function SubscriptionForm() {
                 id="custom-subscription"
                 placeholder="Enter number of days, months, or years"
               />
-              <Button type="submit">Create Plan</Button>
+              <Link href="/admin">
+                <Button type="submit">Create Plan</Button>
+              </Link>
             </form>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Create a custom plan based on your needs.
