@@ -7,6 +7,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from '@vercel/analytics/react';
+import { ClerkProvider } from '@clerk/nextjs';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,16 +26,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <ThemeProvider attribute="class" defaultTheme="dark">
-        <body className={`font-sans ${inter.variable}`}>
-          <TRPCReactProvider cookies={cookies().toString()}>
-            {children}
-            <SpeedInsights />
-            <Analytics />
-          </TRPCReactProvider>
-        </body>
-      </ThemeProvider>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <ThemeProvider attribute="class" defaultTheme="dark">
+          <body className={`font-sans ${inter.variable}`}>
+            <TRPCReactProvider cookies={cookies().toString()}>
+              {children}
+              <SpeedInsights />
+              <Analytics />
+            </TRPCReactProvider>
+          </body>
+        </ThemeProvider>
+      </html>
+    </ClerkProvider>
   );
 }
