@@ -93,7 +93,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 }
 
 
-function UsersIcon(props) {
+function UsersIcon(props: {className: string}) {
   return (
     <svg
       {...props}
@@ -116,7 +116,7 @@ function UsersIcon(props) {
 }
 
 
-function SchoolIcon(props) {
+function SchoolIcon(props: {className: string}) {
   return (
     <svg
       {...props}
@@ -141,7 +141,7 @@ function SchoolIcon(props) {
 }
 
 
-function ActivityIcon(props) {
+function ActivityIcon(props: {className: string}) {
   return (
     <svg
       {...props}
@@ -161,7 +161,7 @@ function ActivityIcon(props) {
 }
 
 
-function BellIcon(props) {
+function BellIcon(props: {className: string}) {
   return (
     <svg
       {...props}
@@ -182,7 +182,7 @@ function BellIcon(props) {
 }
 
 
-function HomeIcon(props) {
+function HomeIcon(props: {className: string}) {
   return (
     <svg
       {...props}
@@ -203,7 +203,7 @@ function HomeIcon(props) {
 }
 
 
-function SearchIcon(props) {
+function SearchIcon(props: {className: string}) {
   return (
     <svg
       {...props}

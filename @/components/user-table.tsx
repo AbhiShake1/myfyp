@@ -60,7 +60,7 @@ export function UserTable<T extends Record<string, any>>({ props }: { props: T[]
 }
 
 
-function MoreHorizontalIcon(props) {
+function MoreHorizontalIcon(props: {className: string}) {
   return (
     <svg
       {...props}
