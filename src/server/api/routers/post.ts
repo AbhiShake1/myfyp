@@ -5,7 +5,6 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { posts } from "~/server/db/schema";
 
 export const postRouter = createTRPCRouter({
   hello: publicProcedure
@@ -24,12 +23,6 @@ export const postRouter = createTRPCRouter({
         createdById: ctx.session.user.id,
       });
     }),
-
-  getLatest: publicProcedure.query(({ ctx }) => {
-    return ctx.db.query.posts.findFirst({
-      orderBy: (posts, { desc }) => [desc(posts.createdAt)],
-    });
-  }),
 
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
