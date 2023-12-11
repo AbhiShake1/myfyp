@@ -54,64 +54,6 @@ export const authOptions: NextAuthOptions = {
   },
   adapter,
   providers: [
-    CredentialsProvider({
-      id: "googleonetap",
-      name: "google-one-tap",
-      credentials: {
-        credential: { type: "text" }
-      },
-      async authorize(credentials) {
-        const token = credentials?.credential;
-
-        if (!token) {
-          throw new Error("Cannot extract payload from signin token");
-        }
-
-        const ticket = await googleAuthClient.verifyIdToken({
-          idToken: token,
-          audience: env.GOOGLE_CLIENT_ID,
-        });
-
-        const payload = ticket.getPayload();
-        if (!payload) {
-          throw new Error("Cannot extract payload from signin token");
-        }
-
-        const { email, sub, given_name, family_name, email_verified, picture: image } = payload;
-
-        if (!email) {
-          throw new Error("Email not available");
-        }
-
-        let user = await adapter.getUserByEmail?.call(undefined, email);
-
-        // If no user is found, then we create one. 
-        if (!user) {
-          user = await adapter.createUser!({
-            name: [given_name, family_name].join(" "),
-            email,
-            image,
-            emailVerified: email_verified ? new Date() : null,
-          });
-        }
-
-        // The user may already exist, but maybe it signed up with a different provider. With the next few lines of code 
-        // we check if the user already had a Google account associated, and if not we create one.
-        const account = await adapter.getUserByAccount?.call(undefined, { provider: "google", providerAccountId: sub });
-
-        if (!account && user) {
-          await adapter.linkAccount?.call(undefined, {
-            userId: user.id,
-            provider: "google",
-            providerAccountId: sub,
-            type: "oauth",
-          });
-        }
-
-        // The authorize function must return a user or null 
-        return user;
-      },
-    }),
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,

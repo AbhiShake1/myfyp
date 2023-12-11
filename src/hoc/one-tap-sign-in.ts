@@ -17,7 +17,7 @@ export const OneTapSignin = ({ children, options }: Props) => {
   const signInCallback = useCallback(async () => {
     setIsLoading(true);
 
-    await signIn("googleonetap", {
+    await signIn("google", {
       redirect: false,
       callbackUrl: `${window.location.origin}/login/journey`,
       ...options,
@@ -31,25 +31,24 @@ export const OneTapSignin = ({ children, options }: Props) => {
     onUnauthenticated() {
       if (isLoading) return;
       const { google } = window;
-      if (google) {
-        google.accounts.id.initialize({
-          client_id: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-          callback: () => void signInCallback(),
-          prompt_parent_id: parentContainerId,
-        });
+      if (!google) return;
+      google.accounts.id.initialize({
+        client_id: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        callback: () => void signInCallback(),
+        prompt_parent_id: parentContainerId,
+      });
 
-        // Here we just console.log some error situations and reason why the google one tap
-        // is not displayed. You may want to handle it depending on yuor application
-        google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed()) {
-            console.log("getNotDisplayedReason ::", notification.getNotDisplayedReason());
-          } else if (notification.isSkippedMoment()) {
-            console.log("getSkippedReason  ::", notification.getSkippedReason());
-          } else if (notification.isDismissedMoment()) {
-            console.log("getDismissedReason ::", notification.getDismissedReason());
-          }
-        });
-      }
+      // Here we just console.log some error situations and reason why the google one tap
+      // is not displayed. You may want to handle it depending on yuor application
+      google.accounts.id.prompt((notification) => {
+        if (notification.isNotDisplayed()) {
+          console.log("getNotDisplayedReason ::", notification.getNotDisplayedReason());
+        } else if (notification.isSkippedMoment()) {
+          console.log("getSkippedReason  ::", notification.getSkippedReason());
+        } else if (notification.isDismissedMoment()) {
+          console.log("getDismissedReason ::", notification.getDismissedReason());
+        }
+      });
     },
   });
 
