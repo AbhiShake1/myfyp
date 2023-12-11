@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useSession, signIn, type SignInOptions } from "next-auth/react";
 import { env } from "~/env";
+import { type CredentialResponse } from "google-one-tap";
 
 interface OneTapSigninOptions {
   parentContainerId?: string;
@@ -14,11 +15,12 @@ export const OneTapSignin = ({ children, options }: Props) => {
   const { parentContainerId } = options ?? {};
   const [isLoading, setIsLoading] = useState(false);
 
-  const signInCallback = useCallback(async () => {
+  const signInCallback = useCallback(async (response: CredentialResponse) => {
     setIsLoading(true);
 
-    await signIn("google", {
+    await signIn("googleonetap", {
       redirect: false,
+			credential: response.credential,
       callbackUrl: `${window.location.origin}/login/journey`,
       ...options,
     });
@@ -34,7 +36,7 @@ export const OneTapSignin = ({ children, options }: Props) => {
       if (!google) return;
       google.accounts.id.initialize({
         client_id: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        callback: () => void signInCallback(),
+        callback: (res) => void signInCallback(res),
         prompt_parent_id: parentContainerId,
       });
 
