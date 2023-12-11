@@ -41,7 +41,7 @@ export const LoginWithGoogleButton = React.forwardRef<HTMLButtonElement, ButtonP
     className={cn(buttonVariants({ variant, size, className }))}
     ref={ref}
     {...props}
-    onClick={() => signIn("google", { redirect: false, callbackUrl: `${window.location.origin}/login/journey` })}>
+    onClick={async () => signIn("google", { redirect: false, callbackUrl: `${window.location.origin}/login/journey` })}>
     <ChromeIcon className="w-4 h-4 mr-2" />
     Login with Google
   </Button>

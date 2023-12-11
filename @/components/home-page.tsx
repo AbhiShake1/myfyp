@@ -20,7 +20,7 @@ export function HomePage() {
               Welcome to Merofyp
             </h1>
             <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400 text-center">
-              Your one-stop solution to final year projects. Get your fyp projects done by indistry experts without deep pockets 😉 . 
+              Your one-stop solution to final year projects. Get your fyp projects done by industry experts without deep pockets 😉 
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">

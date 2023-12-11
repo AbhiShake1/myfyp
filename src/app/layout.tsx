@@ -4,9 +4,12 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import { SessionProvider } from "~/providers/session";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from '@vercel/analytics/react';
+import Script from "next/script";
+import { OneTapSignin } from "~/hoc/one-tap-sign-in";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,13 +30,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <ThemeProvider attribute="class" defaultTheme="dark">
-        <body className={`font-sans ${inter.variable}`}>
-          <TRPCReactProvider cookies={cookies().toString()}>
-            {children}
-            <SpeedInsights />
-            <Analytics />
-          </TRPCReactProvider>
-        </body>
+        <SessionProvider>
+          <OneTapSignin>
+            <body className={`font-sans ${inter.variable}`}>
+              <TRPCReactProvider cookies={cookies().toString()}>
+                <SpeedInsights />
+                <Analytics />
+                <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
+                {children}
+              </TRPCReactProvider>
+            </body>
+          </OneTapSignin>
+        </SessionProvider>
       </ThemeProvider>
     </html>
   );
