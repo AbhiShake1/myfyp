@@ -8,5 +8,5 @@ export default {
   dbCredentials: {
     connectionString: env.DATABASE_URL,
   },
-  tablesFilter: ["myfyp_*"],
+  tablesFilter: ["merofyp_*"],
 } satisfies Config;
