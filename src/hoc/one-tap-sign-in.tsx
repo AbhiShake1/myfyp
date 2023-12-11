@@ -31,7 +31,6 @@ export const OneTapSignin = ({ children }: Props) => {
       google.accounts.id.initialize({
         client_id: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         callback: (res) => void signInCallback(res),
-        prompt_parent_id: "one-tap-popup",
       });
 
       // Here we just console.log some error situations and reason why the google one tap
@@ -48,8 +47,5 @@ export const OneTapSignin = ({ children }: Props) => {
     },
   });
 
-  return <>
-    <div id="one-tap-popup" className="bg-transparent" />
-    {children}
-  </>;
+  return children;
 };
