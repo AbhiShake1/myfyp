@@ -1,18 +1,13 @@
 "use client"
 
 import { useCallback, useState } from "react";
-import { useSession, signIn, type SignInOptions } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { env } from "~/env";
 import { type CredentialResponse } from "google-one-tap";
 
-interface OneTapSigninOptions {
-  parentContainerId?: string;
-}
+type Props = { children: React.ReactNode };
 
-type Props = { children: React.ReactNode, options?: OneTapSigninOptions & Pick<SignInOptions, "redirect" | "callbackUrl"> };
-
-export const OneTapSignin = ({ children, options }: Props) => {
-  const { parentContainerId } = options ?? {};
+export const OneTapSignin = ({ children }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const signInCallback = useCallback(async (response: CredentialResponse) => {
@@ -22,7 +17,6 @@ export const OneTapSignin = ({ children, options }: Props) => {
       redirect: true,
       credential: response.credential,
       callbackUrl: `${window.location.origin}/login/journey`,
-      ...options,
     });
 
     setIsLoading(false);
@@ -37,7 +31,7 @@ export const OneTapSignin = ({ children, options }: Props) => {
       google.accounts.id.initialize({
         client_id: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         callback: (res) => void signInCallback(res),
-        prompt_parent_id: parentContainerId,
+        prompt_parent_id: "one-tap-popup",
       });
 
       // Here we just console.log some error situations and reason why the google one tap
@@ -54,5 +48,8 @@ export const OneTapSignin = ({ children, options }: Props) => {
     },
   });
 
-  return children;
+  return <>
+    <div id="one-tap-popup" className="bg-transparent" />
+    {children}
+  </>;
 };
