@@ -31,7 +31,7 @@ export default function RootLayout({
     <html lang="en">
       <ThemeProvider attribute="class" defaultTheme="dark">
         <SessionProvider>
-          <OneTapSignin>
+          <OneTapSignin options={{ parentContainerId: "oneTap" }}>
             <body className={`font-sans ${inter.variable}`}>
               <TRPCReactProvider cookies={cookies().toString()}>
                 <SpeedInsights />
