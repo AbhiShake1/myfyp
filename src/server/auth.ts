@@ -104,13 +104,14 @@ export const authOptions: NextAuthOptions = {
             userId: user.id,
             provider: "google",
             providerAccountId: sub,
-            type: "oauth",
+            type: "email",
           });
         }
 
         // The authorize function must return a user or null 
         return user;
       },
+      type: "credentials",
     }),
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
@@ -126,9 +127,6 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
-	session: {
-		strategy: "jwt",
-	},
 };
 
 /**
