@@ -104,7 +104,7 @@ export const authOptions: NextAuthOptions = {
             userId: user.id,
             provider: "google",
             providerAccountId: sub,
-            type: "email",
+            type: "oauth",
           });
         }
 
