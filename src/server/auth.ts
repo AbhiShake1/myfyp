@@ -43,15 +43,6 @@ const adapter = DrizzleAdapter(db, mysqlTable);
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
-  },
   adapter,
   providers: [
     CredentialsProvider({
@@ -66,19 +57,16 @@ export const authOptions: NextAuthOptions = {
         if (!token) {
           throw new Error("Cannot extract payload from signin token");
         }
-				console.log(token, 'token')
 
         const ticket = await googleAuthClient.verifyIdToken({
           idToken: token,
           audience: env.GOOGLE_CLIENT_ID,
         });
-				console.log(ticket)
 
         const payload = ticket.getPayload();
         if (!payload) {
           throw new Error("Cannot extract payload from signin token");
         }
-				console.log(payload, 'payload')
 
         const { email, sub, given_name, family_name, email_verified, picture: image } = payload;
 
@@ -87,7 +75,6 @@ export const authOptions: NextAuthOptions = {
         }
 
         let user = await adapter.getUserByEmail?.call(undefined, email);
-				console.log(user, 'user')
 
         // If no user is found, then we create one. 
         if (!user) {
@@ -111,7 +98,6 @@ export const authOptions: NextAuthOptions = {
             type: "email",
           });
         }
-				console.log(account, 'account')
 
         // The authorize function must return a user or null 
         return user;
@@ -132,6 +118,7 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  session: { strategy: "jwt" },
 };
 
 /**
