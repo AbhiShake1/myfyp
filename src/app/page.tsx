@@ -6,5 +6,5 @@ export default async function Home() {
   const session = await getServerAuthSession();
   console.log(session)
 
-  return <HomePage showLogin={!session} />;
+  return <HomePage />;
 }

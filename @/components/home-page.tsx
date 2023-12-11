@@ -4,8 +4,12 @@
  */
 import { CardHeader, CardContent, Card } from "@/components/ui/card"
 import { LoginWithGoogleButton } from "./login-with-google-button"
+import { getServerAuthSession } from "~/server/auth"
 
-export function HomePage({ showLogin }: { showLogin: boolean }) {
+export async function HomePage() {
+	const session = await getServerAuthSession()
+	const showLogin = !session;
+
   return (
     <>
       <header className="flex h-20 w-full items-center px-4 md:px-6">
