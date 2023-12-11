@@ -19,8 +19,8 @@ export const OneTapSignin = ({ children, options }: Props) => {
     setIsLoading(true);
 
     await signIn("googleonetap", {
-      redirect: false,
-			credential: response.credential,
+      redirect: true,
+      credential: response.credential,
       callbackUrl: `${window.location.origin}/login/journey`,
       ...options,
     });
