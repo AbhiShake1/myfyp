@@ -5,12 +5,12 @@
 import { CardHeader, CardContent, Card } from "@/components/ui/card"
 import { LoginWithGoogleButton } from "./login-with-google-button"
 
-export function HomePage() {
+export function HomePage({ showLogin }: { showLogin: boolean }) {
   return (
     <>
       <header className="flex h-20 w-full items-center px-4 md:px-6">
         <div className="ml-auto">
-          <LoginWithGoogleButton size="lg" variant="default"/>
+          {showLogin && <LoginWithGoogleButton size="lg" variant="default" />}
         </div>
       </header>
       <main className="container mx-auto px-4 md:px-6">
@@ -20,7 +20,7 @@ export function HomePage() {
               Welcome to Merofyp
             </h1>
             <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400 text-center">
-              Your one-stop solution to final year projects. Get your fyp projects done by industry experts without deep pockets 😉 
+              Your one-stop solution to final year projects. Get your fyp projects done by industry experts without deep pockets 😉
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
