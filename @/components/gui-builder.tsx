@@ -120,7 +120,7 @@ export function GuiBuilder() {
               Save
             </Button>
           </div>
-          <div className={`border ${isDragging && "border-primary"} shadow-sm rounded-lg flex flex-col h-full space-y-2`} onDrop={onDrop} onDragOver={onDragOver}>
+          <div className={`border ${items.length === 0 && "border-dashed"} ${isDragging ? "border-primary" : "border-gray-500"} shadow-sm rounded-lg flex flex-col h-full space-y-2`} onDrop={onDrop} onDragOver={onDragOver}>
             {items.length === 0 && <h2 className="text-lg font-semibold p-4">Drag and drop components here</h2>}
             {items.map(i => <div className="bg-red-400">{i}</div>)}
           </div>
