@@ -7,9 +7,13 @@
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
-const components = [
+const _components = [
+  {
+    name: "Column",
+    icon: FormInputIcon,
+  },
   {
     name: "Text",
     icon: TextIcon,
@@ -31,6 +35,12 @@ const components = [
 export function GuiBuilder() {
   const [items, setItems] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const components = useMemo(() => {
+    if (search.length === 0) return _components;
+    return _components.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+  }, [search])
 
   const onDragStart = useCallback((e: React.DragEvent, type: string) => {
     e.dataTransfer.setData("widget", type);
@@ -95,6 +105,8 @@ export function GuiBuilder() {
                   className="w-full bg-white shadow-none appearance-none pl-8 md:w-2/3 lg:w-1/3 dark:bg-gray-950"
                   placeholder="Search components..."
                   type="search"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
                 />
               </div>
             </form>
