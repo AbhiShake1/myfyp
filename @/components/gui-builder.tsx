@@ -7,6 +7,7 @@
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import React, { useCallback, useState } from "react";
 
 const components = [
   {
@@ -28,6 +29,30 @@ const components = [
 ];
 
 export function GuiBuilder() {
+  const [items, setItems] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const onDragStart = useCallback((e: React.DragEvent, type: string) => {
+    e.dataTransfer.setData("widget", type);
+    if (!isDragging)
+      setIsDragging(true);
+  }, []);
+
+  const onDrop = useCallback((e: React.DragEvent) => {
+    const widget = e.dataTransfer.getData("widget");
+    setItems(i => [...i, widget])
+    if (isDragging)
+      setIsDragging(false);
+  }, [isDragging]);
+
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const onDragEnd = useCallback(() => {
+    if (isDragging) setIsDragging(false);
+  }, [isDragging])
+
   return (
     <div className="grid min-h-screen w-full lg:grid-cols-[300px_1fr]">
       <div className="hidden lg:block border-r bg-gray-100/40 dark:bg-gray-800/40">
@@ -41,7 +66,13 @@ export function GuiBuilder() {
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-4 text-sm font-medium">
               {components.map(({ icon: Icon, name }) => (
-                <Button variant="ghost" className="gap-2 justify-start">
+                <Button
+                  key={name}
+                  draggable
+                  onDragStart={e => onDragStart(e, name)}
+                  onDragEnd={onDragEnd}
+                  variant="ghost" className="gap-2 justify-start"
+                >
                   <Icon className="h-4 w-4" />
                   {name}
                 </Button>
@@ -76,8 +107,9 @@ export function GuiBuilder() {
               Save
             </Button>
           </div>
-          <div className="border shadow-sm rounded-lg">
-            <h2 className="text-lg font-semibold p-4">Drag and drop components here</h2>
+          <div className={`border ${isDragging && "border-primary"} shadow-sm rounded-lg flex flex-col space-y-2`} onDrop={onDrop} onDragOver={onDragOver}>
+            {items.length === 0 && <h2 className="text-lg font-semibold p-4">Drag and drop components here</h2>}
+            {items.map(i => <div className="bg-red-400">{i}</div>)}
           </div>
         </main>
       </div>
