@@ -81,10 +81,11 @@ export function GuiBuilder() {
                   draggable
                   onDragStart={e => onDragStart(e, name)}
                   onDragEnd={onDragEnd}
-                  variant="ghost" className="gap-2 justify-start"
+                  variant="ghost"
+                  className="gap-2 justify-start"
                 >
                   <Icon className="h-4 w-4" />
-                  {name}
+                  <div className="w-full text-left">{name}</div>
                 </Button>
               ))}
             </nav>
@@ -119,7 +120,7 @@ export function GuiBuilder() {
               Save
             </Button>
           </div>
-          <div className={`border ${isDragging && "border-primary"} shadow-sm rounded-lg flex flex-col space-y-2`} onDrop={onDrop} onDragOver={onDragOver}>
+          <div className={`border ${isDragging && "border-primary"} shadow-sm rounded-lg flex flex-col h-full space-y-2`} onDrop={onDrop} onDragOver={onDragOver}>
             {items.length === 0 && <h2 className="text-lg font-semibold p-4">Drag and drop components here</h2>}
             {items.map(i => <div className="bg-red-400">{i}</div>)}
           </div>
