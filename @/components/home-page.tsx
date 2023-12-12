@@ -5,10 +5,12 @@
 import { CardHeader, CardContent, Card } from "@/components/ui/card"
 import { LoginWithGoogleButton } from "./login-with-google-button"
 import { getServerAuthSession } from "~/server/auth"
+import { Button } from "./ui/button";
+import Link from "next/link";
 
 export async function HomePage() {
-	const session = await getServerAuthSession()
-	const showLogin = !session;
+  const session = await getServerAuthSession()
+  const showLogin = !session;
 
   return (
     <>
@@ -56,6 +58,22 @@ export async function HomePage() {
                 <p className="text-gray-500 dark:text-gray-400">
                   Your data is safe with us. Your supervisors will think you did your FYP 😜
                 </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <h2 className="text-2xl font-semibold">Excillent Drag-and-Drop builder</h2>
+              </CardHeader>
+              <CardContent className="flex flex-col space-y-4">
+                <p className="text-gray-500 dark:text-gray-400">
+                  Build unlimited full-stack websites just with drag and drop and publish them for as long as you are subscribed.
+                  Don't worry, you can still use the builder without subscription.
+                </p>
+                <Button>
+								<Link href="/builder">
+                  Try now for free
+								</Link>
+                </Button>
               </CardContent>
             </Card>
           </div>

@@ -10,6 +10,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from '@vercel/analytics/react';
 import Script from "next/script";
 import { OneTapSignin } from "~/hoc/one-tap-sign-in";
+import { DndProvider } from "~/providers/dnd";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,7 +38,9 @@ export default function RootLayout({
                 <SpeedInsights />
                 <Analytics />
                 <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
-                {children}
+                <DndProvider>
+                  {children}
+                </DndProvider>
               </TRPCReactProvider>
             </body>
           </OneTapSignin>
