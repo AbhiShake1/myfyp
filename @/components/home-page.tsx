@@ -23,7 +23,7 @@ export async function HomePage() {
         <section className="w-full py-12 md:py-24 lg:py-32">
           <div className="space-y-3">
             <h1 className="text-4xl font-bold tracking-tighter text-center sm:text-5xl md:text-6xl">
-              Welcome to Merofyp
+              Welcome to MeroFYP
             </h1>
             <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400 text-center">
               Your one-stop solution to final year projects. Get your fyp projects done by industry experts without deep pockets 😉

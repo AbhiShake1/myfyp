@@ -13,29 +13,44 @@ const _components = [
   {
     name: "Column",
     icon: FormInputIcon,
+    component: () => <div>Column</div>
+  },
+  {
+    name: "Button",
+    icon: FormInputIcon,
+    component: () => <Button>Form</Button>
   },
   {
     name: "Text",
     icon: TextIcon,
+    component: () => <div>Text</div>
   },
   {
     name: "Image",
     icon: ImageIcon,
+    component: () => <div>Image</div>
   },
   {
     name: "Video",
     icon: VideoIcon,
+    component: () => <div>Video</div>
   },
   {
     name: "Form",
     icon: FormInputIcon,
+    component: () => <div>Form</div>
   },
-];
+] as const;
+
+type ComponentType = typeof _components[number]["name"];
+
+type Component = { type: ComponentType, id: number, component: typeof _components[number]["component"] };
 
 export function GuiBuilder() {
-  const [items, setItems] = useState<string[]>([]);
+  const [items, setItems] = useState<Component[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [search, setSearch] = useState("");
+  const [isChildDragging, setIsChildDragging] = useState(false);
 
   const components = useMemo(() => {
     if (search.length === 0) return _components;
@@ -43,17 +58,30 @@ export function GuiBuilder() {
   }, [search])
 
   const onDragStart = useCallback((e: React.DragEvent, type: string) => {
-    e.dataTransfer.setData("widget", type);
+    e.dataTransfer.setData("component", type);
+    e.dataTransfer.dropEffect = "copy";
+    if (!isDragging)
+      setIsDragging(true);
+  }, []);
+
+  const onChildDragStart = useCallback((e: React.DragEvent, type: string) => {
+    setIsChildDragging(true);
+    e.dataTransfer.setData("component", type);
+    e.dataTransfer.dropEffect = "copy";
     if (!isDragging)
       setIsDragging(true);
   }, []);
 
   const onDrop = useCallback((e: React.DragEvent) => {
-    const widget = e.dataTransfer.getData("widget");
-    setItems(i => [...i, widget])
-    if (isDragging)
-      setIsDragging(false);
-  }, [isDragging]);
+    if (isChildDragging) return;
+    const widget = e.dataTransfer.getData("component") as ComponentType;
+    setItems(i => [...i, { type: widget, id: Math.random(), component: _components.find(c => c.name === widget)!.component }])
+    setIsDragging(false);
+  }, [isDragging, isChildDragging]);
+
+  const onChildDrop = useCallback((e: React.DragEvent) => {
+    setIsChildDragging(true);
+  }, [isChildDragging]);
 
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -62,6 +90,10 @@ export function GuiBuilder() {
   const onDragEnd = useCallback(() => {
     if (isDragging) setIsDragging(false);
   }, [isDragging])
+
+  const onChildDragEnd = useCallback(() => {
+    setIsChildDragging(false);
+  }, [])
 
   return (
     <div className="grid min-h-screen w-full lg:grid-cols-[300px_1fr]">
@@ -94,8 +126,8 @@ export function GuiBuilder() {
       </div>
       <div className="flex flex-col">
         <header className="flex h-14 lg:h-16 items-center gap-4 border-b bg-gray-100/40 px-6 dark:bg-gray-800/40">
-          <Link className="lg:hidden" href="#">
-            <FacebookIcon className="h-6 w-6" />
+          <Link className="lg:hidden" href="/">
+            <TextIcon className="h-6 w-6" />
             <span className="sr-only">Home</span>
           </Link>
           <div className="w-full flex-1">
@@ -120,36 +152,24 @@ export function GuiBuilder() {
               Save
             </Button>
           </div>
-          <div className={`border ${items.length === 0 && "border-dashed"} ${isDragging ? "border-primary" : "border-gray-500"} shadow-sm rounded-lg flex flex-col h-full space-y-2`} onDrop={onDrop} onDragOver={onDragOver}>
+          <div id="drop-parent" className={`border ${items.length === 0 && "border-dashed"} ${isDragging ? "border-primary" : "border-gray-500"} shadow-sm rounded-lg flex flex-col h-full space-y-2`} onDrop={onDrop} onDragOver={onDragOver}>
             {items.length === 0 && <h2 className="text-lg font-semibold p-4">Drag and drop components here</h2>}
-            {items.map(i => <div className="bg-red-400">{i}</div>)}
+            {items.map(({ type, id, component: Component }) => {
+              const childId = `droppable-child-${type}-${id}`;
+
+              return (
+                <div key={childId} draggable onDrop={onChildDrop} onDragStart={e => onChildDragStart(e, type)} onDragEnd={onChildDragEnd} className="group relative">
+                  <Component />
+                  {!isChildDragging && <Button className="absolute top-2 right-2 hidden group-hover:block" variant="destructive" size="sm" onClick={() => setItems(i => i.filter(item => item.id !== id))}>DELETE</Button>}
+                </div>
+              );
+            })}
           </div>
         </main>
       </div>
     </div>
   )
 }
-
-
-function FacebookIcon(props: { className: string }) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-    </svg>
-  )
-}
-
 
 function TextIcon(props: { className: string }) {
   return (
