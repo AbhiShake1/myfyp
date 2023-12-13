@@ -9,42 +9,44 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import React, { useCallback, useMemo, useState, type KeyboardEvent, type ChangeEvent, useRef } from "react";
 
-function ButtonComponent () {
+const ButtonComponent: React.FC = () => {
   const [text, setText] = useState<string>("Button");
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const originalText = useRef(text);
+  const [originalText, setOriginalText] = useState<string>(text);
+  const ref = useRef<HTMLInputElement>(null);
 
   const onDoubleClick = useCallback(() => {
     setIsEditing(true);
+    ref.current?.focus();
   }, []);
 
   const onBlur = useCallback(() => {
-    setIsEditing(false);
+    // setIsEditing(false);
   }, []);
 
   const onKeyDown = useCallback((event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === 'Enter') {
       setIsEditing(false);
-      originalText.current = text;
+      setOriginalText(text);
     } else if (event.key === 'Escape') {
       setIsEditing(false);
-      setText(originalText.current);
+      setText(originalText);
     }
   }, []);
 
-  const onChange = useCallback((event: ChangeEvent<HTMLButtonElement>) => {
+  const onChange = (event: ChangeEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     setText(event.target.textContent ?? '');
-  }, []);
+  };
 
   return (
     <Button
-      contentEditable={isEditing}
       onDoubleClick={onDoubleClick}
       onBlur={onBlur}
       onKeyDown={onKeyDown}
       onInput={onChange}
     >
-      {text}
+      {isEditing ? <input ref={ref} className="bg-transparent" value={text} onChange={e => setText(e.target.value)} /> : text}
     </Button>
   );
 }
