@@ -36,7 +36,7 @@ export default function RootLayout({
               <TRPCReactProvider cookies={cookies().toString()}>
                 <SpeedInsights />
                 <Analytics />
-                <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
+                <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
                 {children}
               </TRPCReactProvider>
             </body>
