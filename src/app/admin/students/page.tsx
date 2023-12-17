@@ -1,18 +1,28 @@
-import { UserTable } from "@/components/user-table";
-
-const users = [
-	{
-		name: 'abhi',
-		age: 22,
-		height: 161,
-	},
-	{
-		name: 'abhi',
-		age: 22,
-		height: 161,
-	},
-];
+import { FypPage } from "@/components/dynamic";
 
 export default function Page() {
-  return <UserTable props={users} />;
+  return <FypPage>
+    {{
+      body: {
+        expand: true,
+        sections: [
+          {
+            type: "table",
+            data: [
+              {
+                name: 'abhi',
+                age: 22,
+                height: 161,
+              },
+              {
+                name: 'abhi',
+                age: 22,
+                height: 161,
+              },
+            ],
+          },
+        ],
+      },
+    }}
+  </FypPage>
 }

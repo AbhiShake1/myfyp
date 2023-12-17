@@ -10,7 +10,6 @@ export type FypFooterProps = {
   },
 };
 
-
 export type FypFormProps = {
   type: "form",
   title?: string,
