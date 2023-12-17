@@ -13,9 +13,9 @@ export type FypFooterProps = {
 
 export type FypFormProps = {
   type: "form",
-  title: string,
+  title?: string,
   inputs: Omit<FypInputProps, "type">[],
-  button: Omit<FypButtonProps, "type">,
+  button?: Omit<FypButtonProps, "type">,
   footer?: FypFooterProps,
 };
 
@@ -25,7 +25,7 @@ export function FypForm({ button, footer, inputs }: FypFormProps) {
       <FypInputs>
         {inputs}
       </FypInputs>
-      <FypButton type="button" {...button} />
+      {button && <FypButton type="button" {...button} />}
     </form>
     {
       footer && <p className="text-xs text-gray-500 dark:text-gray-400">

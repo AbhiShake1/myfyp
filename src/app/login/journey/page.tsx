@@ -15,16 +15,21 @@ export default function Page() {
             header: {
               title: "Step 1: Personal Information",
             },
-            inputs: [
+            content: [
               {
-                title: "First Name",
-                placeholder: "John",
-                required: true,
-              },
-              {
-                title: "Last Name",
-                placeholder: "Doe",
-                required: true,
+                type: "form",
+                inputs: [
+                  {
+                    title: "First Name",
+                    placeholder: "John",
+                    required: true,
+                  },
+                  {
+                    title: "Last Name",
+                    placeholder: "Doe",
+                    required: true,
+                  },
+                ],
               },
             ],
           },
@@ -33,11 +38,16 @@ export default function Page() {
             header: {
               title: "Step 2: College Selection",
             },
-            inputs: [
+            content: [
               {
-                title: "College",
-                placeholder: "Harvard University",
-              }
+                type: "form",
+                inputs: [
+                  {
+                    title: "College",
+                    placeholder: "Harvard University",
+                  }
+                ],
+              },
             ],
           },
           {
@@ -45,16 +55,21 @@ export default function Page() {
             header: {
               title: "Step 3: Batch and Course Selection",
             },
-            inputs: [
+            content: [
               {
-                title: "Batch",
-                placeholder: "2022",
-                required: true,
-              },
-              {
-                title: "Course",
-                placeholder: "Computer Science",
-                required: true,
+                type: "form",
+                inputs: [
+                  {
+                    title: "Batch",
+                    placeholder: "2022",
+                    required: true,
+                  },
+                  {
+                    title: "Course",
+                    placeholder: "Computer Science",
+                    required: true,
+                  },
+                ],
               },
             ],
           },
