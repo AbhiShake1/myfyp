@@ -7,6 +7,7 @@ import { FypForm, type FypFormProps } from "./form";
 import { type FypInputProps } from "./input";
 
 export type FypPageBodySection = (
+  string |
   FypCardProps |
   FypInputProps |
   FypButtonProps |
@@ -36,6 +37,9 @@ export function FypPageBody(body: FypPageBodyProps) {
     {
       body.sections?.map(
         (props, index) => {
+          if (typeof props === "string") {
+            return <p>{props}</p>
+          }
           if (!("type" in props)) {
             return <FypPageBody {...props} key={index} />;
           }
