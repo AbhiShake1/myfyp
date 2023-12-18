@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { FypButton, type FypButtonProps } from "./button";
 import { type FypCardProps, FypCard } from "./card";
 import { FypForm, type FypFormProps } from "./form";
-import { type FypInputProps } from "./input";
+import { FypInputs, type FypInputProps } from "./input";
 import { FypTable, type FypTableProps } from "./table";
 
 export type FypPageBodySection = (
@@ -55,6 +55,8 @@ export function FypPageBody(body: FypPageBodyProps) {
               return <FypForm {...props} key={index} />;
             case "table":
               return <FypTable {...props} key={index} />;
+            case "input":
+              return <FypInputs>{[props]}</FypInputs>
           }
         },
       )
