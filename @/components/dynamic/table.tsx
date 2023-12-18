@@ -50,13 +50,16 @@ export type FypTableProps = {
 
 type FypColumnDef = ColumnDef<Single<FypTableProps["data"]>>;
 
+function getKeys(records: FypTableProps["data"]): string[] {
+  const keys = records.flatMap(Object.keys);
+  const uniqueKeys = new Set(keys);
+  return [...uniqueKeys];
+}
+
 export function FypTable({ data, searchField }: FypTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
   const columns: FypColumnDef[] = React.useMemo(() => [
@@ -82,7 +85,7 @@ export function FypTable({ data, searchField }: FypTableProps) {
       enableSorting: false,
       enableHiding: false,
     },
-    ...Object.keys(data.at(0) ?? []).map<FypColumnDef>((cell) => ({
+    ...getKeys(data).map<FypColumnDef>((cell) => ({
       accessorKey: cell,
       header: ({ column }) => {
         return (
