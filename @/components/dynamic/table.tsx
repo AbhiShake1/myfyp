@@ -36,17 +36,19 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet"
-import { Label } from "../ui/label"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
-import { FypPageBody, type FypPageBodySection } from "./body"
-import { FypForm } from "./form"
 import { FypPage } from "."
 
 type Single<T> = T extends Array<infer U> ? U : never;
 
 export type FypTableProps = {
   type: "table",
-  data: Record<string, FypPageBodySection>[],
+  data: Record<string, any>[],
+  schema?: Record<string, {
+    required: boolean,
+    title: string,
+    placeholder: string,
+  }>[],
   searchField?: string,
 };
 
@@ -58,11 +60,17 @@ function getKeys(records: FypTableProps["data"]): string[] {
   return [...uniqueKeys];
 }
 
-export function FypTable({ data, searchField }: FypTableProps) {
+export function FypTable({ data, searchField, schema: defaultSchema }: FypTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+
+  const schema = React.useMemo(
+    () => defaultSchema?.map(d => ({ type: "input", title: d.title, placeholder: d.placeholder, required: d.required })) ??
+      getKeys(data).map(d => ({ type: "input", title: d, placeholder: d, required: false })),
+    [data],
+  );
 
   const columns: FypColumnDef[] = React.useMemo(() => [
     {
@@ -122,7 +130,7 @@ export function FypTable({ data, searchField }: FypTableProps) {
                   {{
                     body: {
                       // every field is optional for patch request
-                      sections: getKeys(data).map(d => ({ type: "input", title: d, placeholder: d, required: false })),
+                      sections: schema,
                     },
                   }}
                 </FypPage>
@@ -211,7 +219,7 @@ export function FypTable({ data, searchField }: FypTableProps) {
                 <FypPage>
                   {{
                     body: {
-                      sections: getKeys(data).map(d => ({ type: "input", title: d, placeholder: d, required: false })),
+                      sections: schema,
                     },
                   }}
                 </FypPage>
