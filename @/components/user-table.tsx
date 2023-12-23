@@ -10,7 +10,7 @@ function toTitleCase(str: string) {
   return str.replace(/\b\w/g, (txt) => txt.toUpperCase());
 }
 
-export function UserTable<T extends Record<string, any>>({ props }: { props: T[] }) {
+export function UserTable<T extends Record<string, string | number>>({ props }: { props: T[] }) {
   if (props.length === 0) return null;
 
   return (
