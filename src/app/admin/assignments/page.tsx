@@ -1,10 +1,6 @@
 import { FypPage } from "@/components/dynamic";
-import { getServerAuthSession } from "~/server/auth";
 
-export default async function Page() {
-  const session = await getServerAuthSession();
-  console.log(session);
-
+export default function Page() {
   return <FypPage>
     {{
       body: {
@@ -12,7 +8,7 @@ export default async function Page() {
         sections: [
           {
             type: "table",
-            searchField: "name",
+						searchField: "name",
             data: [
               {
                 name: 'b',

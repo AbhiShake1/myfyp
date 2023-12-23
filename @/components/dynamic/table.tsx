@@ -38,9 +38,7 @@ import {
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet"
 import { Label } from "../ui/label"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
-import { FypPageBody, type FypPageBodySection } from "./body"
-import { FypForm } from "./form"
-import { FypPage } from "."
+import { type FypPageBodySection } from "./body"
 
 type Single<T> = T extends Array<infer U> ? U : never;
 
@@ -118,14 +116,20 @@ export function FypTable({ data, searchField }: FypTableProps) {
                 <SheetHeader>
                   <SheetTitle>Edit Item</SheetTitle>
                 </SheetHeader>
-                <FypPage>
-                  {{
-                    body: {
-                      // every field is optional for patch request
-                      sections: getKeys(data).map(d => ({ type: "input", title: d, placeholder: d, required: false })),
-                    },
-                  }}
-                </FypPage>
+                <div className="grid gap-4 py-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="itemName">Item Name</Label>
+                    <Input defaultValue="Item Name" id="itemName" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="itemStatus">Item Status</Label>
+                    <Input defaultValue="In Stock" id="itemStatus" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="itemQuantity">Quantity</Label>
+                    <Input defaultValue="50" id="itemQuantity" />
+                  </div>
+                </div>
                 <SheetFooter>
                   <SheetClose asChild>
                     <Button type="submit">Save changes</Button>
@@ -199,30 +203,7 @@ export function FypTable({ data, searchField }: FypTableProps) {
               className="max-w-sm"
             />
           }
-          <div className="text-right">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="default">Add New Item</Button>
-              </SheetTrigger>
-              <SheetContent side="left">
-                <SheetHeader>
-                  <SheetTitle>Add New Item</SheetTitle>
-                </SheetHeader>
-                <FypPage>
-                  {{
-                    body: {
-                      sections: getKeys(data).map(d => ({ type: "input", title: d, placeholder: d, required: false })),
-                    },
-                  }}
-                </FypPage>
-                <SheetFooter>
-                  <SheetClose asChild>
-                    <Button type="submit">Add Item</Button>
-                  </SheetClose>
-                </SheetFooter>
-              </SheetContent>
-            </Sheet>
-          </div>
+          <Button variant="default">Add New Item</Button>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
