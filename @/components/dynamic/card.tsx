@@ -1,5 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { FypPageBody, type FypPageBodyProps } from "./body";
+import { FypButton, type FypButtonProps } from "./button";
+import { FypForm, type FypFormProps } from "./form";
+import { type FypInputProps, FypInputs } from "./input";
 
 export type FypCardProps = {
   type: "card",
@@ -7,7 +9,7 @@ export type FypCardProps = {
     title: string,
     description?: string,
   },
-  content?: FypPageBodyProps["sections"],
+  content?: (string | FypButtonProps | FypFormProps | FypInputProps)[],
 };
 
 export function FypCard({ content, header }: FypCardProps) {
@@ -17,7 +19,23 @@ export function FypCard({ content, header }: FypCardProps) {
       <CardDescription>{header?.description ?? ""}</CardDescription>
     </CardHeader>
     <CardContent className="space-y-2">
-      {content && <FypPageBody sections={content} />}
+      {
+        content?.map((c, index) => {
+          if (typeof c === "string") {
+            return <p key={index}>{c}</p>
+          }
+          if ("type" in c) {
+            switch (c.type) {
+              case "button":
+                return <FypButton {...c} key={index} />
+              case "form":
+                return <FypForm {...c} key={index} />
+              case "input":
+                return <FypInputs key={index}>{[c]}</FypInputs>
+            }
+          }
+        })
+      }
     </CardContent>
   </Card>
 }
