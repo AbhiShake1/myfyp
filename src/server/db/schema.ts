@@ -11,11 +11,14 @@ import {
   varchar,
   date,
   bigint,
+  mysqlEnum,
 } from "drizzle-orm/mysql-core";
 import { type AdapterAccount } from "next-auth/adapters";
 import { fypTable, mysqlTable } from "./helpers/fyp-table";
 
 export { fypTable, mysqlTable } from "./helpers/fyp-table";
+
+const roles = mysqlEnum("roles", ["admin", "staff", "student"]).default("student");
 
 export const users = fypTable("user", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
@@ -26,48 +29,36 @@ export const users = fypTable("user", {
     fsp: 3,
   }).default(sql`CURRENT_TIMESTAMP(3)`),
   image: varchar("image", { length: 255 }),
-  role: varchar("role", { length: 255 }).$type<"admin" | "staff" | "student">().default("student"),
-});
-
-export const staffs = fypTable('staffs', {
-  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-  user_id: varchar('user_id', { length: 255 }),
-});
-
-export const students = fypTable('students', {
-  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-  user_id: varchar('user_id', { length: 255 }),
-  staff_id: varchar('staff_id', { length: 255 }),
+  role: roles,
 });
 
 export const studentSubscriptions = fypTable('studentSubscriptions', {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-  student_id: varchar('student_id', { length: 255 }),
-  start_date: date('start_date'),
-  end_date: date('end_date'),
-  subscription_status: varchar('subscription_status', { length: 255 }),
+  userId: varchar('user_id', { length: 255 }),
+  startDate: date('start_date'),
+  endDate: date('end_date'),
+  subscriptionStatus: varchar('subscription_status', { length: 255 }),
 });
 
 export const assignments = fypTable('assignments', {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-  staff_id: varchar('staff_id', { length: 255 }),
-  student_id: varchar('student_id', { length: 255 }),
+  userId: varchar('user_id', { length: 255 }),
   file_path: varchar('file_path', { length: 255 }),
 });
 
 export const chats = fypTable('chats', {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-  sender_id: varchar('sender_id', { length: 255 }),
-  receiver_id: varchar('receiver_id', { length: 255 }),
+  senderId: varchar('sender_id', { length: 255 }),
+  receiverId: varchar('receiver_id', { length: 255 }),
   message: text('message'),
   timestamp: timestamp('timestamp'),
 });
 
 export const files = fypTable('files', {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-  chat_id: varchar('chat_id', { length: 255 }),
-  file_url: varchar('file_url', { length: 255 }),
-  file_type: varchar('file_type', { length: 255 }),
+  chatId: varchar('chat_id', { length: 255 }),
+  fileUrl: varchar('file_url', { length: 255 }),
+  fileType: varchar('file_type', { length: 255 }),
 });
 
 export const accounts = mysqlTable(
@@ -108,61 +99,38 @@ export const sessions = mysqlTable(
 );
 
 export const usersRelations = relations(users, ({ many }) => ({
-  staffs: many(staffs),
-  students: many(students),
+  staffs: many(users),
+  students: many(users),
   chats: many(chats),
   accounts: many(accounts),
   sessions: many(sessions),
 }));
 
-export const staffsRelations = relations(staffs, ({ many, one }) => ({
-  user: one(users, {
-    fields: [staffs.user_id],
-    references: [users.id]
-  }),
-  students: many(students),
-  assignments: many(assignments),
-}));
-
-export const studentsRelations = relations(students, ({ many, one }) => ({
-  user: one(users, {
-    fields: [students.user_id],
-    references: [users.id]
-  }),
-  staff: one(staffs, {
-    fields: [students.staff_id],
-    references: [staffs.id]
-  }),
-  subscriptions: many(studentSubscriptions),
-  assignments: many(assignments),
-  chats: many(chats),
-}));
-
 export const studentSubscriptionsRelations = relations(studentSubscriptions, ({ one }) => ({
-  student: one(students, {
-    fields: [studentSubscriptions.student_id],
-    references: [students.id]
+  student: one(users, {
+    fields: [studentSubscriptions.userId],
+    references: [users.id]
   }),
 }));
 
 export const assignmentsRelations = relations(assignments, ({ one }) => ({
-  staff: one(staffs, {
-    fields: [assignments.staff_id],
-    references: [staffs.id]
+  staff: one(users, {
+    fields: [assignments.userId],
+    references: [users.id]
   }),
-  student: one(students, {
-    fields: [assignments.student_id],
-    references: [students.id]
+  student: one(users, {
+    fields: [assignments.userId],
+    references: [users.id]
   }),
 }));
 
 export const chatsRelations = relations(chats, ({ many, one }) => ({
   sender: one(users, {
-    fields: [chats.sender_id],
+    fields: [chats.senderId],
     references: [users.id]
   }),
   receiver: one(users, {
-    fields: [chats.receiver_id],
+    fields: [chats.receiverId],
     references: [users.id]
   }),
   files: many(files),
@@ -170,11 +138,10 @@ export const chatsRelations = relations(chats, ({ many, one }) => ({
 
 export const filesRelations = relations(files, ({ one }) => ({
   chat: one(chats, {
-    fields: [files.chat_id],
+    fields: [files.chatId],
     references: [chats.id]
   }),
 }));
-
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
   user: one(users, { fields: [accounts.userId], references: [users.id] }),
