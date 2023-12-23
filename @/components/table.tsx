@@ -37,23 +37,35 @@ import {
 } from "@/components/ui/table"
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
-import { Label } from "./ui/label"
+import { type DefaultInputProps, FYPInput } from "./input/fyp-input"
 
 type Single<T> = T extends Array<infer U> ? U : never;
 
+type TableDataProps = Record<string, string | number>[];
+
+type TableSchema = DefaultInputProps[];
+
 export type CRUDTableProps = {
-  data: Record<string, string | number>[],
+  data: TableDataProps,
+  createSchema: TableSchema,
   searchField?: string,
 };
 
-export function CRUDTable({ data, searchField }: CRUDTableProps) {
+function getKeys(records: TableDataProps): string[] {
+  const keys = records.flatMap(Object.keys);
+  const uniqueKeys = new Set(keys);
+  return [...uniqueKeys];
+};
+
+export function CRUDTable({ data, searchField, createSchema }: CRUDTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+
+  // for partial updates
+  const updateSchema = React.useMemo(() => createSchema.map(s => ({ ...s, required: false })), []);
 
   const columns: ColumnDef<Single<typeof data>>[] = React.useMemo(() => [
     {
@@ -78,7 +90,7 @@ export function CRUDTable({ data, searchField }: CRUDTableProps) {
       enableSorting: false,
       enableHiding: false,
     },
-    ...Object.keys(data.at(0) ?? []).map<ColumnDef<Single<typeof data>>>((cell) => ({
+    ...getKeys(data).map<ColumnDef<Single<typeof data>>>((cell) => ({
       accessorKey: cell,
       header: ({ column }) => {
         return (
@@ -110,18 +122,7 @@ export function CRUDTable({ data, searchField }: CRUDTableProps) {
                   <SheetTitle>Edit Item</SheetTitle>
                 </SheetHeader>
                 <div className="grid gap-4 py-4">
-                  <div className="space-y-1">
-                    <Label htmlFor="itemName">Item Name</Label>
-                    <Input defaultValue="Item Name" id="itemName" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="itemStatus">Item Status</Label>
-                    <Input defaultValue="In Stock" id="itemStatus" />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="itemQuantity">Quantity</Label>
-                    <Input defaultValue="50" id="itemQuantity" />
-                  </div>
+                  {updateSchema.map((s, i) => <FYPInput key={i} {...s} />)}
                 </div>
                 <SheetFooter>
                   <SheetClose asChild>
@@ -180,7 +181,7 @@ export function CRUDTable({ data, searchField }: CRUDTableProps) {
       columnVisibility,
       rowSelection,
     },
-  })
+  });
 
   return (
     <div className="w-full">
@@ -196,7 +197,26 @@ export function CRUDTable({ data, searchField }: CRUDTableProps) {
               className="max-w-sm"
             />
           }
-          <Button variant="default">Add New Item</Button>
+          <Sheet>
+            <SheetTrigger>
+              <Button variant="default">Add New Item</Button>
+            </SheetTrigger>
+            <SheetContent side="left">
+              <SheetHeader>
+                <SheetTitle>
+                  Add Item
+                </SheetTitle>
+              </SheetHeader>
+              <div className="grid gap-4 py-4">
+                {createSchema.map((s, i) => <FYPInput key={i} {...s} />)}
+              </div>
+              <SheetFooter>
+                <SheetClose asChild>
+                  <Button type="submit">Add Item</Button>
+                </SheetClose>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

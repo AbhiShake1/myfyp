@@ -56,7 +56,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-4 text-sm font-medium">
               {links.map(({ href, icon, title }) => {
-                return <Link className={path === href ? activeStyle : inactiveStyle} href={href}>
+                return <Link key={href} className={path === href ? activeStyle : inactiveStyle} href={href}>
                   {icon}
 									{title}
                 </Link>

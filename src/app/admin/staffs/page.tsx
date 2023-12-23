@@ -1,4 +1,4 @@
-import { UserTable } from "@/components/user-table";
+import { CRUDTable } from "@/components/table";
 
 const staffs = [
   {
@@ -14,5 +14,5 @@ const staffs = [
 ];
 
 export default function Page() {
-  return <UserTable props={staffs} />;
+  return <CRUDTable data={staffs} />;
 }
