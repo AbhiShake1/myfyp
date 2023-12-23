@@ -1,9 +1,6 @@
 import { FypPage } from "@/components/dynamic";
-import { api } from "~/trpc/server";
 
-export default async function Page() {
-  const data = await api.staff.all.query();
-
+export default function Page() {
   return <FypPage>
     {{
       body: {
@@ -11,7 +8,23 @@ export default async function Page() {
         sections: [
           {
             type: "table",
-            data,
+            data: [
+              {
+                name: 'Abhi',
+                designation: 'Developer',
+                stack: 'Flutter/next/nest',
+              },
+              {
+                name: 'Abhi',
+                designation: 'Developer',
+                stack: 'Flutter/next/nest',
+              },
+              {
+                name: 'Abhi2',
+                designation: 'Developer',
+                stack: 'Flutter/next/nest',
+              },
+            ],
           },
         ],
       },

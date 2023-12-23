@@ -29,33 +29,45 @@ export const users = fypTable("user", {
   role: varchar("role", { length: 255 }).$type<"admin" | "staff" | "student">().default("student"),
 });
 
+export const staffs = fypTable('staffs', {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  user_id: varchar('user_id', { length: 255 }),
+});
+
+export const students = fypTable('students', {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  user_id: varchar('user_id', { length: 255 }),
+  staff_id: varchar('staff_id', { length: 255 }),
+});
+
 export const studentSubscriptions = fypTable('studentSubscriptions', {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-  userId: varchar('user_id', { length: 255 }),
-  startDate: date('start_date'),
-  endDate: date('end_date'),
-  subscriptionStatus: varchar('subscription_status', { length: 255 }),
+  student_id: varchar('student_id', { length: 255 }),
+  start_date: date('start_date'),
+  end_date: date('end_date'),
+  subscription_status: varchar('subscription_status', { length: 255 }),
 });
 
 export const assignments = fypTable('assignments', {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-  userId: varchar('user_id', { length: 255 }),
+  staff_id: varchar('staff_id', { length: 255 }),
+  student_id: varchar('student_id', { length: 255 }),
   file_path: varchar('file_path', { length: 255 }),
 });
 
 export const chats = fypTable('chats', {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-  senderId: varchar('sender_id', { length: 255 }),
-  receiverId: varchar('receiver_id', { length: 255 }),
+  sender_id: varchar('sender_id', { length: 255 }),
+  receiver_id: varchar('receiver_id', { length: 255 }),
   message: text('message'),
   timestamp: timestamp('timestamp'),
 });
 
 export const files = fypTable('files', {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-  chatId: varchar('chat_id', { length: 255 }),
-  fileUrl: varchar('file_url', { length: 255 }),
-  fileType: varchar('file_type', { length: 255 }),
+  chat_id: varchar('chat_id', { length: 255 }),
+  file_url: varchar('file_url', { length: 255 }),
+  file_type: varchar('file_type', { length: 255 }),
 });
 
 export const accounts = mysqlTable(
@@ -96,34 +108,61 @@ export const sessions = mysqlTable(
 );
 
 export const usersRelations = relations(users, ({ many }) => ({
-  students: many(users),
-  staffs: many(users),
+  staffs: many(staffs),
+  students: many(students),
   chats: many(chats),
   accounts: many(accounts),
   sessions: many(sessions),
 }));
 
-export const studentSubscriptionsRelations = relations(studentSubscriptions, ({ one }) => ({
-  student: one(users, {
-    fields: [studentSubscriptions.userId],
+export const staffsRelations = relations(staffs, ({ many, one }) => ({
+  user: one(users, {
+    fields: [staffs.user_id],
     references: [users.id]
+  }),
+  students: many(students),
+  assignments: many(assignments),
+}));
+
+export const studentsRelations = relations(students, ({ many, one }) => ({
+  user: one(users, {
+    fields: [students.user_id],
+    references: [users.id]
+  }),
+  staff: one(staffs, {
+    fields: [students.staff_id],
+    references: [staffs.id]
+  }),
+  subscriptions: many(studentSubscriptions),
+  assignments: many(assignments),
+  chats: many(chats),
+}));
+
+export const studentSubscriptionsRelations = relations(studentSubscriptions, ({ one }) => ({
+  student: one(students, {
+    fields: [studentSubscriptions.student_id],
+    references: [students.id]
   }),
 }));
 
 export const assignmentsRelations = relations(assignments, ({ one }) => ({
-  staff: one(users, {
-    fields: [assignments.userId],
-    references: [users.id]
+  staff: one(staffs, {
+    fields: [assignments.staff_id],
+    references: [staffs.id]
+  }),
+  student: one(students, {
+    fields: [assignments.student_id],
+    references: [students.id]
   }),
 }));
 
 export const chatsRelations = relations(chats, ({ many, one }) => ({
   sender: one(users, {
-    fields: [chats.senderId],
+    fields: [chats.sender_id],
     references: [users.id]
   }),
   receiver: one(users, {
-    fields: [chats.receiverId],
+    fields: [chats.receiver_id],
     references: [users.id]
   }),
   files: many(files),
@@ -131,10 +170,11 @@ export const chatsRelations = relations(chats, ({ many, one }) => ({
 
 export const filesRelations = relations(files, ({ one }) => ({
   chat: one(chats, {
-    fields: [files.chatId],
+    fields: [files.chat_id],
     references: [chats.id]
   }),
 }));
+
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
   user: one(users, { fields: [accounts.userId], references: [users.id] }),

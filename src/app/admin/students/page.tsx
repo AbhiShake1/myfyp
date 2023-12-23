@@ -1,19 +1,28 @@
 import { FypPage } from "@/components/dynamic";
-import { api } from "~/trpc/server";
 
-export default async function Page() {
-	const data = await api.student.all.query();
-	return <FypPage>
-		{{
-			body: {
-				expand: true,
-				sections: [
-					{
-						type: "table",
-						data,
-					},
-				],
-			},
-		}}
-	</FypPage>
+export default function Page() {
+  return <FypPage>
+    {{
+      body: {
+        expand: true,
+        sections: [
+          {
+            type: "table",
+            data: [
+              {
+                name: 'abhi',
+                age: 22,
+                height: 161,
+              },
+              {
+                name: 'abhi',
+                age: 22,
+                height: 161,
+              },
+            ],
+          },
+        ],
+      },
+    }}
+  </FypPage>
 }
