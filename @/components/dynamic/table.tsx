@@ -80,7 +80,7 @@ export function FypTable({ data, searchField }: FypTableProps) {
       enableSorting: false,
       enableHiding: false,
     },
-    ...Object.keys(data.at(0) ?? []).map<ColumnDef<Single<typeof data>>>((cell) => ({
+    ...Object.keys(data.at(0) ?? []).map((cell) => ({
       accessorKey: cell,
       header: ({ column }) => {
         return (
