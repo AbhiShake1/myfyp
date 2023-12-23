@@ -20,7 +20,7 @@ export type FypFormProps = {
 };
 
 export function FypForm({ button, footer, inputs }: FypFormProps) {
-  return <div className="w-full max-w-md text-center">
+  return <div className="w-full max-w-md my-2 text-center">
     <form className="flex flex-col items-center">
       <FypInputs>
         {inputs}

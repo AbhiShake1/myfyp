@@ -38,7 +38,7 @@ export function FypPageBody(body: FypPageBodyProps) {
       body.sections?.map(
         (props, index) => {
           if (typeof props === "string") {
-            return <p key={index}>{props}</p>
+            return <p>{props}</p>
           }
           if (!("type" in props)) {
             return <FypPageBody {...props} key={index} />;
