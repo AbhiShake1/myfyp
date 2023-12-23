@@ -1,23 +1,13 @@
-import { FypPage } from "@/components/dynamic";
+import { UserTable } from "@/components/user-table";
+
+const assignments = [
+  {
+    name: 'a',
+    user: 'b',
+    semester: '5',
+  },
+];
 
 export default function Page() {
-  return <FypPage>
-    {{
-      body: {
-        expand: true,
-        sections: [
-          {
-            type: "table",
-            data: [
-              {
-                name: 'a',
-                user: 'b',
-                semester: '5',
-              },
-            ],
-          },
-        ],
-      },
-    }}
-  </FypPage>
+  return <UserTable props={assignments} />;
 }

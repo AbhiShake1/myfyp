@@ -19,22 +19,22 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const links = [
     {
       href: '/admin',
-      title: 'Home',
+			title: 'Home',
       icon: <HomeIcon className="h-4 w-4" />
     },
     {
       href: '/admin/staffs',
-      title: 'Staffs',
+			title: 'Staffs',
       icon: <UsersIcon className="h-4 w-4" />
     },
     {
       href: '/admin/students',
-      title: 'Students',
+			title: 'Students',
       icon: <UsersIcon className="h-4 w-4" />
     },
     {
       href: '/admin/assignments',
-      title: 'Assignments',
+			title: 'Assignments',
       icon: <ActivityIcon className="h-4 w-4" />
     },
   ];
@@ -56,9 +56,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-4 text-sm font-medium">
               {links.map(({ href, icon, title }) => {
-                return <Link key={href} className={path === href ? activeStyle : inactiveStyle} href={href}>
+                return <Link className={path === href ? activeStyle : inactiveStyle} href={href}>
                   {icon}
-                  {title}
+									{title}
                 </Link>
               })}
             </nav>
@@ -93,7 +93,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 }
 
 
-function UsersIcon(props: { className: string }) {
+function UsersIcon(props: {className: string}) {
   return (
     <svg
       {...props}
@@ -116,7 +116,7 @@ function UsersIcon(props: { className: string }) {
 }
 
 
-function SchoolIcon(props: { className: string }) {
+function SchoolIcon(props: {className: string}) {
   return (
     <svg
       {...props}
@@ -141,7 +141,7 @@ function SchoolIcon(props: { className: string }) {
 }
 
 
-function ActivityIcon(props: { className: string }) {
+function ActivityIcon(props: {className: string}) {
   return (
     <svg
       {...props}
@@ -161,7 +161,7 @@ function ActivityIcon(props: { className: string }) {
 }
 
 
-function BellIcon(props: { className: string }) {
+function BellIcon(props: {className: string}) {
   return (
     <svg
       {...props}
@@ -182,7 +182,7 @@ function BellIcon(props: { className: string }) {
 }
 
 
-function HomeIcon(props: { className: string }) {
+function HomeIcon(props: {className: string}) {
   return (
     <svg
       {...props}
@@ -203,7 +203,7 @@ function HomeIcon(props: { className: string }) {
 }
 
 
-function SearchIcon(props: { className: string }) {
+function SearchIcon(props: {className: string}) {
   return (
     <svg
       {...props}

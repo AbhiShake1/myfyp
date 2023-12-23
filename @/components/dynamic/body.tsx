@@ -5,16 +5,13 @@ import { FypButton, type FypButtonProps } from "./button";
 import { type FypCardProps, FypCard } from "./card";
 import { FypForm, type FypFormProps } from "./form";
 import { type FypInputProps } from "./input";
-import { FypTable, type FypTableProps } from "./table";
 
 export type FypPageBodySection = (
   string |
-  number |
   FypCardProps |
   FypInputProps |
   FypButtonProps |
   FypFormProps |
-  FypTableProps |
   FypPageBodyProps
 );
 
@@ -40,7 +37,7 @@ export function FypPageBody(body: FypPageBodyProps) {
     {
       body.sections?.map(
         (props, index) => {
-          if (typeof props === "string" || typeof props === "number") {
+          if (typeof props === "string") {
             return <p key={index}>{props}</p>
           }
           if (!("type" in props)) {
@@ -52,9 +49,7 @@ export function FypPageBody(body: FypPageBodyProps) {
             case "button":
               return <FypButton {...props} key={index} />;
             case "form":
-              return <FypForm {...props} key={index} />;
-            case "table":
-              return <FypTable {...props} key={index} />;
+              return <FypForm {...props} key={index} />
           }
         },
       )

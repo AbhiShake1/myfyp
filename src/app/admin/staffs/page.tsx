@@ -1,33 +1,18 @@
-import { FypPage } from "@/components/dynamic";
+import { UserTable } from "@/components/user-table";
+
+const staffs = [
+  {
+    name: 'Abhi',
+    designation: 'Developer',
+    stack: 'Flutter/next/nest',
+  },
+  {
+    name: 'Abhi',
+    designation: 'Developer',
+    stack: 'Flutter/next/nest',
+  },
+];
 
 export default function Page() {
-  return <FypPage>
-    {{
-      body: {
-        expand: true,
-        sections: [
-          {
-            type: "table",
-            data: [
-              {
-                name: 'Abhi',
-                designation: 'Developer',
-                stack: 'Flutter/next/nest',
-              },
-              {
-                name: 'Abhi',
-                designation: 'Developer',
-                stack: 'Flutter/next/nest',
-              },
-              {
-                name: 'Abhi2',
-                designation: 'Developer',
-                stack: 'Flutter/next/nest',
-              },
-            ],
-          },
-        ],
-      },
-    }}
-  </FypPage>
+  return <UserTable props={staffs} />;
 }
