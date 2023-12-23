@@ -23,6 +23,6 @@ const schema = [
   },
 ];
 
-export default function Page() {
+export default async function Page() {
   return <CRUDTable data={assignments} createSchema={schema} />;
 }

@@ -1,5 +1,5 @@
 import { createTRPCRouter } from "../trpc";
 
-export const postRouter = createTRPCRouter({
+export const chatRouter = createTRPCRouter({
 
 });
