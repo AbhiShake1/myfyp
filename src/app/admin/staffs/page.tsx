@@ -14,5 +14,5 @@ const staffs = [
 ];
 
 export default function Page() {
-  return <CRUDTable data={staffs} />;
+  return <CRUDTable data={staffs} createSchema={[]}/>;
 }
