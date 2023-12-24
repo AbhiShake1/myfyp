@@ -10,7 +10,7 @@ import { OAuth2Client } from "google-auth-library";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
-import { mysqlTable } from "~/server/db/schema";
+import { mysqlTable, users } from "~/server/db/schema";
 
 const googleAuthClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
@@ -106,6 +106,7 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
     /**
      * ...add more providers here.
@@ -117,6 +118,16 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  callbacks: {
+    async signIn({ user }) {
+      const existingUser = await db.query.users.findMany({ where: ({ email }, { eq }) => eq(email, user.email ?? "") });
+      if (existingUser.length === 0) {
+        await db.insert(users).values({ email: user.email!, name: user.name, image: user.image });
+      }
+
+      return true;
+    },
+  },
   session: { strategy: "jwt" },
 };
 

@@ -21,7 +21,6 @@ export { fypTable, mysqlTable } from "./helpers/fyp-table";
 const roles = mysqlEnum("roles", ["admin", "staff", "student"]).default("student");
 
 export const users = fypTable("user", {
-  id: varchar("id", { length: 255 }).notNull().primaryKey(),
   name: varchar("name", { length: 255 }),
   email: varchar("email", { length: 255 }).notNull(),
   emailVerified: timestamp("emailVerified", {
@@ -33,7 +32,6 @@ export const users = fypTable("user", {
 });
 
 export const studentSubscriptions = fypTable('studentSubscriptions', {
-  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
   userId: varchar('user_id', { length: 255 }),
   startDate: date('start_date'),
   endDate: date('end_date'),
@@ -41,13 +39,11 @@ export const studentSubscriptions = fypTable('studentSubscriptions', {
 });
 
 export const assignments = fypTable('assignments', {
-  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
   userId: varchar('user_id', { length: 255 }),
   file_path: varchar('file_path', { length: 255 }),
 });
 
 export const chats = fypTable('chats', {
-  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
   senderId: varchar('sender_id', { length: 255 }),
   receiverId: varchar('receiver_id', { length: 255 }),
   message: text('message'),
@@ -55,7 +51,6 @@ export const chats = fypTable('chats', {
 });
 
 export const files = fypTable('files', {
-  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
   chatId: varchar('chat_id', { length: 255 }),
   fileUrl: varchar('file_url', { length: 255 }),
   fileType: varchar('file_type', { length: 255 }),
@@ -99,9 +94,9 @@ export const sessions = mysqlTable(
 );
 
 export const usersRelations = relations(users, ({ many }) => ({
-  staffs: many(users),
-  students: many(users),
-  chats: many(chats),
+  // staffs: many(users),
+  // students: many(users),
+  // chats: many(chats),
   accounts: many(accounts),
   sessions: many(sessions),
 }));
