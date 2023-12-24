@@ -142,7 +142,7 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
                   <SheetHeader>
                     <SheetTitle>Edit Item</SheetTitle>
                   </SheetHeader>
-                  <form onSubmit={handleUpdateSubmit(e => updateMutation(e))}>
+                  <form onSubmit={handleUpdateSubmit(e => updateMutation.mutate(e))}>
                     <div className="grid gap-4 py-4">
                       {updateSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...registerUpdate(s[0])} />)}
                     </div>
