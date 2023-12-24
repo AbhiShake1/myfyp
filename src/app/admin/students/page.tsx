@@ -1,18 +1,22 @@
-import { CRUDTable } from "@/components/table";
+"use client";
 
-const users = [
-  {
-    name: 'abhi',
-    age: 22,
-    height: 161,
-  },
-  {
-    name: 'abhi',
-    age: 22,
-    height: 161,
-  },
-];
+import { CRUDTable } from "@/components/table";
+import { api } from "~/trpc/react";
 
 export default function Page() {
-  return <CRUDTable data={users} createSchema={[]} />;
+  const { data: users } = api.student.all.useQuery();
+  const updateMutation = api.student.update.useMutation();
+
+  if (!users) return null;
+
+  return <CRUDTable data={users} updateMutation={updateMutation} createSchema={{
+    name: {
+      label: "Name",
+      placeholder: "John Doe",
+    },
+    email: {
+      label: "Email",
+      placeholder: "john.doe@gmail.com",
+    },
+  }} />;
 }

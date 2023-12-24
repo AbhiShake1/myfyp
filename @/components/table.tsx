@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useForm } from "react-hook-form"
 import {
   CaretSortIcon,
   ChevronDownIcon,
@@ -38,34 +39,53 @@ import {
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { type DefaultInputProps, FYPInput } from "./input/fyp-input"
+import { type UseTRPCMutationResult } from "@trpc/react-query/shared"
 
 type Single<T> = T extends Array<infer U> ? U : never;
 
-type TableDataProps = Record<string, string | number>[];
+type TableDataProps = Record<string, string | number | null>[];
 
-type TableSchema = DefaultInputProps[];
-
-export type CRUDTableProps = {
-  data: TableDataProps,
-  createSchema: TableSchema,
-  searchField?: string,
+export type CRUDTableProps<T, K> = {
+  data: T[];
+  createSchema: T extends Record<infer U, unknown> ? Record<U, DefaultInputProps> : never;
+  searchField?: K;
+  exclude?: K[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  createMutation?: UseTRPCMutationResult<any, any, any, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  updateMutation?: UseTRPCMutationResult<any, any, any, unknown>;
 };
 
-function getKeys(records: TableDataProps): string[] {
-  const keys = records.flatMap(Object.keys);
-  const uniqueKeys = new Set(keys);
-  return [...uniqueKeys];
+function getKeys<K>(keys: string[], exclude?: K[]): string[] {
+  if (!exclude) {
+    return keys;
+  }
+  return keys.filter(k => !exclude.includes(k as K));
 };
 
-export function CRUDTable({ data, searchField, createSchema }: CRUDTableProps) {
+export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({ data, exclude, searchField, createSchema: schema, createMutation, updateMutation }: CRUDTableProps<T, K>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
+  const createSchema = React.useMemo(() => Object.entries(schema), [schema]);
+
+  const {
+    register: registerCreate,
+    handleSubmit: handleCreateSubmit
+  } = useForm();
+
+  const {
+    register: registerUpdate,
+    handleSubmit: handleUpdateSubmit
+  } = useForm();
+
   // for partial updates
-  const updateSchema = React.useMemo(() => createSchema.map(s => ({ ...s, required: false })), []);
+  const updateSchema = React.useMemo(() => createSchema.map(s => ({
+    ...s,
+    required: false,
+  })), []);
 
   const columns: ColumnDef<Single<typeof data>>[] = React.useMemo(() => [
     {
@@ -90,7 +110,7 @@ export function CRUDTable({ data, searchField, createSchema }: CRUDTableProps) {
       enableSorting: false,
       enableHiding: false,
     },
-    ...getKeys(data).map<ColumnDef<Single<typeof data>>>((cell) => ({
+    ...getKeys(Object.keys(schema), exclude).map<ColumnDef<Single<typeof data>>>((cell) => ({
       accessorKey: cell,
       header: ({ column }) => {
         return (
@@ -111,26 +131,30 @@ export function CRUDTable({ data, searchField, createSchema }: CRUDTableProps) {
       cell: () => {
         return (
           <div className="text-right">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button size="icon" variant="outline">
-                  <PencilIcon className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Edit Item</SheetTitle>
-                </SheetHeader>
-                <div className="grid gap-4 py-4">
-                  {updateSchema.map((s, i) => <FYPInput key={i} {...s} />)}
-                </div>
-                <SheetFooter>
-                  <SheetClose asChild>
-                    <Button type="submit">Save changes</Button>
-                  </SheetClose>
-                </SheetFooter>
-              </SheetContent>
-            </Sheet>
+            {updateMutation &&
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button size="icon" variant="outline">
+                    <PencilIcon className="h-4 w-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Edit Item</SheetTitle>
+                  </SheetHeader>
+                  <form onSubmit={handleUpdateSubmit(e => updateMutation(e))}>
+                    <div className="grid gap-4 py-4">
+                      {updateSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...registerUpdate(s[0])} />)}
+                    </div>
+                    <SheetFooter>
+                      <SheetClose asChild>
+                        <Button type="submit">Save changes</Button>
+                      </SheetClose>
+                    </SheetFooter>
+                  </form>
+                </SheetContent>
+              </Sheet>
+            }
             <Dialog>
               <DialogTrigger asChild>
                 <Button className="ml-2 text-red-500" size="icon" variant="outline">
@@ -189,15 +213,15 @@ export function CRUDTable({ data, searchField, createSchema }: CRUDTableProps) {
         <div className="flex flex-row space-x-2">
           {searchField &&
             <Input
-              placeholder={`Search ${searchField}...`}
-              value={(table.getColumn(searchField)?.getFilterValue() as string) ?? ""}
+              placeholder={`Search ${searchField.toString()}...`}
+              value={(table.getColumn(searchField.toString())?.getFilterValue() as string) ?? ""}
               onChange={(event) =>
-                table.getColumn(searchField)?.setFilterValue(event.target.value)
+                table.getColumn(searchField.toString())?.setFilterValue(event.target.value)
               }
               className="max-w-sm"
             />
           }
-          <Sheet>
+          {createMutation && <Sheet>
             <SheetTrigger>
               <Button variant="default">Add New Item</Button>
             </SheetTrigger>
@@ -207,16 +231,16 @@ export function CRUDTable({ data, searchField, createSchema }: CRUDTableProps) {
                   Add Item
                 </SheetTitle>
               </SheetHeader>
-              <div className="grid gap-4 py-4">
-                {createSchema.map((s, i) => <FYPInput key={i} {...s} />)}
-              </div>
-              <SheetFooter>
-                <SheetClose asChild>
+              <form onSubmit={handleCreateSubmit(e => createMutation.mutate(e))}>
+                <div className="grid gap-4 py-4">
+                  {createSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...registerCreate(s[0])} />)}
+                </div>
+                <SheetFooter>
                   <Button type="submit">Add Item</Button>
-                </SheetClose>
-              </SheetFooter>
+                </SheetFooter>
+              </form>
             </SheetContent>
-          </Sheet>
+          </Sheet>}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

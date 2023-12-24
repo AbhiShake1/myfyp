@@ -1,28 +1,22 @@
+"use client";
+
 import { CRUDTable } from "@/components/table";
+import { api } from "~/trpc/react";
 
-const assignments = [
-  {
-    name: 'a',
-    user: 'b',
-    semester: '5',
-  },
-];
+export default function Page() {
+  const { data: assignments } = api.assignment.all.useQuery();
+  const updateMutation = api.assignment.update.useMutation();
+  const createMutation = api.assignment.create.useMutation();
 
-const schema = [
-  {
-    type: "text",
-    label: "Name",
-    placeholder: "John Doe",
-		required: true,
-  },
-  {
-    type: "select",
-		placeholder: "User",
-    label: "User",
-    options: ["a", "b"].map(o => ({ label: o, value: o })),
-  },
-];
+  if (!assignments) return null;
 
-export default async function Page() {
-  return <CRUDTable data={assignments} createSchema={schema} />;
+  return <CRUDTable data={assignments} createMutation={createMutation} updateMutation={updateMutation} createSchema={{
+    userId: {
+      type: "text",
+      label: "User ID",
+      placeholder: "user_01",
+      required: true,
+    },
+  }} searchField="userId" />;
 }
+

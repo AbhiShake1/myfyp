@@ -99,7 +99,6 @@ export const authOptions: NextAuthOptions = {
           });
         }
 
-        // The authorize function must return a user or null 
         return user;
       },
       type: "credentials",

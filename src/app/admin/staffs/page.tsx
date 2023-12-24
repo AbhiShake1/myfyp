@@ -1,18 +1,22 @@
-import { CRUDTable } from "@/components/table";
+"use client";
 
-const staffs = [
-  {
-    name: 'Abhi',
-    designation: 'Developer',
-    stack: 'Flutter/next/nest',
-  },
-  {
-    name: 'Abhi',
-    designation: 'Developer',
-    stack: 'Flutter/next/nest',
-  },
-];
+import { CRUDTable } from "@/components/table";
+import { api } from "~/trpc/react";
 
 export default function Page() {
-  return <CRUDTable data={staffs} createSchema={[]}/>;
+  const { data: staffs } = api.staff.all.useQuery();
+  const updateMutation = api.staff.update.useMutation();
+
+  if (!staffs) return null;
+
+  return <CRUDTable data={staffs} createSchema={{
+    name: {
+      label: "Name",
+      placeholder: "John Doe",
+    },
+    email: {
+      label: "Email",
+      placeholder: "john.doe@gmail.com",
+    },
+  }} updateMutation={updateMutation} />;
 }

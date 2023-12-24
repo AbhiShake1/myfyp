@@ -1,8 +1,8 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { assignmentRouter } from "./routers/assignment";
 import { chatRouter } from "./routers/chat";
-import { postRouter } from "./routers/post";
 import { studentRouter } from "./routers/student";
+import { staffRouter } from "./routers/staff";
 import { subscriptionRouter } from "./routers/subscription";
 
 /**
@@ -11,11 +11,11 @@ import { subscriptionRouter } from "./routers/subscription";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-	assignment: assignmentRouter,
-	chat: chatRouter,
-	post: postRouter,
-	student: studentRouter,
-	subscription: subscriptionRouter,
+  assignment: assignmentRouter,
+  chat: chatRouter,
+  staff: staffRouter,
+  student: studentRouter,
+  studentSubscription: subscriptionRouter,
 });
 
 // export type definition of API
