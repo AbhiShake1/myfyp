@@ -7,10 +7,11 @@ export default function Page() {
   const { data: assignments } = api.assignment.all.useQuery();
   const updateMutation = api.assignment.update.useMutation();
   const createMutation = api.assignment.create.useMutation();
+  const deleteMutation = api.assignment.delete.useMutation();
 
   if (!assignments) return null;
 
-  return <CRUDTable data={assignments} createMutation={createMutation} updateMutation={updateMutation} createSchema={{
+  return <CRUDTable data={assignments} deleteMutation={deleteMutation} createMutation={createMutation} updateMutation={updateMutation} createSchema={{
     userId: {
       type: "text",
       label: "User ID",

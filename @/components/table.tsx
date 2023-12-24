@@ -54,6 +54,8 @@ export type CRUDTableProps<T, K> = {
   createMutation?: UseTRPCMutationResult<any, any, any, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateMutation?: UseTRPCMutationResult<any, any, any, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  deleteMutation?: UseTRPCMutationResult<any, any, any, unknown>;
 };
 
 function getKeys<K>(keys: string[], exclude?: K[]): string[] {
@@ -63,7 +65,7 @@ function getKeys<K>(keys: string[], exclude?: K[]): string[] {
   return keys.filter(k => !exclude.includes(k as K));
 };
 
-export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({ data, exclude, searchField, createSchema: schema, createMutation, updateMutation }: CRUDTableProps<T, K>) {
+export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({ data, exclude, searchField, createSchema: schema, createMutation, updateMutation, deleteMutation }: CRUDTableProps<T, K>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -155,33 +157,35 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
                 </SheetContent>
               </Sheet>
             }
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="ml-2 text-red-500" size="icon" variant="outline">
-                  <TrashIcon className="h-4 w-4" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Delete Item</DialogTitle>
-                </DialogHeader>
-                <div className="py-4">
-                  <p>Are you sure you want to delete this item?</p>
-                </div>
-                <DialogFooter className="flex justify-end gap-4">
-                  <div>
-                    <Button className="bg-gray-200 text-black px-4 py-2 rounded" type="button">
-                      Reconsider
-                    </Button>
+            {deleteMutation &&
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="ml-2 text-red-500" size="icon" variant="outline">
+                    <TrashIcon className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Delete Item</DialogTitle>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <p>Are you sure you want to delete this item?</p>
                   </div>
-                  <div>
-                    <Button className="bg-red-600 text-white px-4 py-2 rounded" type="submit">
-                      Confirm Delete
-                    </Button>
-                  </div>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                  <DialogFooter className="flex justify-end gap-4">
+                    <div>
+                      <Button className="bg-gray-200 text-black px-4 py-2 rounded" type="button">
+                        Reconsider
+                      </Button>
+                    </div>
+                    <div>
+                      <Button className="bg-red-600 text-white px-4 py-2 rounded" type="button" onSubmit={deleteMutation.mutate}>
+                        Confirm Delete
+                      </Button>
+                    </div>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            }
           </div>
         )
       },
