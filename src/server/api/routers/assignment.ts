@@ -9,7 +9,7 @@ const AssignmentID = z.custom<NonNullable<AssignmentInsert["id"]>>();
 export const assignmentRouter = createTRPCRouter({
   all: protectedProcedure.query(({ ctx }) => {
     return ctx.db.query.assignments.findMany({
-      columns: { userId: true },
+      columns: { userId: true, id: true },
     });
   }),
   create: protectedProcedure

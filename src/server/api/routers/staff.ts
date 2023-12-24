@@ -9,13 +9,14 @@ const StudentID = z.custom<NonNullable<StudentInsert["id"]>>();
 export const staffRouter = createTRPCRouter({
   all: protectedProcedure.query(({ ctx }) => {
     return ctx.db.query.users
-		.findMany({
-			columns: {
-				name: true,
-				email: true,
-			},
-      where: ({ role }, { eq }) => eq(role, "admin")
-    })
+      .findMany({
+        columns: {
+          name: true,
+          email: true,
+          id: true,
+        },
+        where: ({ role }, { eq }) => eq(role, "admin")
+      })
   }),
   update: protectedProcedure
     .input(z.custom<StudentInsert>().and(z.object({ id: StudentID })))

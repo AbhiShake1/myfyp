@@ -40,23 +40,24 @@ import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { type DefaultInputProps, FYPInput } from "./input/fyp-input"
 import { type UseTRPCMutationResult } from "@trpc/react-query/shared"
+import { type ExecutedQuery } from "@planetscale/database"
 
 type Single<T> = T extends Array<infer U> ? U : never;
 
-type TableDataProps = Record<string, string | number | null>[];
+type TableDataProps = { id: string, [key: string]: string | number | null }[];;
 
 type Mutations = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createMutation?: UseTRPCMutationResult<any, any, any, unknown>;
+  createMutation?: UseTRPCMutationResult<ExecutedQuery, any, any, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  updateMutation?: UseTRPCMutationResult<any, any, any, unknown>;
+  updateMutation?: UseTRPCMutationResult<ExecutedQuery, any, any, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  deleteMutation?: UseTRPCMutationResult<any, any, any, unknown>;
+  deleteMutation?: UseTRPCMutationResult<ExecutedQuery, any, string, unknown>;
 }
 
 type DataProps<T> = {
   data: T[];
-  createSchema: T extends Record<infer U, unknown> ? Record<U, DefaultInputProps> : never;
+  createSchema: T extends Record<infer U, unknown> ? Omit<Record<U, DefaultInputProps>, "id"> : never;
 }
 
 export type CRUDTableProps<T, K> = {
@@ -65,10 +66,8 @@ export type CRUDTableProps<T, K> = {
 } & Mutations & DataProps<T>;
 
 function getKeys<K>(keys: string[], exclude?: K[]): string[] {
-  if (!exclude) {
-    return keys;
-  }
-  return keys.filter(k => !exclude.includes(k as K));
+  const newExclude = [...(exclude ?? []), "id"];
+  return keys.filter(k => !newExclude.includes(k as K));
 };
 
 export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({ data, exclude, searchField, createSchema: schema, createMutation, updateMutation, deleteMutation }: CRUDTableProps<T, K>) {
@@ -122,7 +121,7 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
         return (
           <div className="text-right">
             {updateMutation && <EditButton index={index} data={data} createSchema={schema} mutation={updateMutation} />}
-            {deleteMutation && <DeleteButton mutation={deleteMutation} />}
+            {deleteMutation && <DeleteButton mutation={deleteMutation} id={data[index]?.id?.toString() ?? ""} />}
           </div>
         )
       },
@@ -269,7 +268,7 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
   )
 }
 
-function CreateButton<T extends Single<TableDataProps>>({ mutation, schema }: { mutation: NonNullable<Mutations["deleteMutation"]>, schema: DataProps<T>["createSchema"] }) {
+function CreateButton<T extends Single<TableDataProps>>({ mutation, schema }: { mutation: NonNullable<Mutations["createMutation"]>, schema: DataProps<T>["createSchema"] }) {
   const createSchema = React.useMemo(() => Object.entries(schema), [schema]);
 
   const { register, handleSubmit } = useForm();
@@ -296,7 +295,7 @@ function CreateButton<T extends Single<TableDataProps>>({ mutation, schema }: { 
   </Sheet>
 }
 
-function DeleteButton({ mutation }: { mutation: NonNullable<Mutations["deleteMutation"]> }) {
+function DeleteButton({ id, mutation }: { id: string, mutation: NonNullable<Mutations["deleteMutation"]> }) {
   return <Dialog>
     <DialogTrigger asChild>
       <Button className="ml-2 text-red-500" size="icon" variant="outline">
@@ -317,7 +316,7 @@ function DeleteButton({ mutation }: { mutation: NonNullable<Mutations["deleteMut
           </Button>
         </div>
         <div>
-          <Button className="bg-red-600 text-white px-4 py-2 rounded" onClick={mutation.mutate}>
+          <Button className="bg-red-600 text-white px-4 py-2 rounded" onClick={() => mutation.mutate(id)}>
             Confirm Delete
           </Button>
         </div>
@@ -326,7 +325,7 @@ function DeleteButton({ mutation }: { mutation: NonNullable<Mutations["deleteMut
   </Dialog>
 }
 
-function EditButton<T extends Single<TableDataProps>>({ index, data, mutation, createSchema }: { index: number, mutation: NonNullable<Mutations["deleteMutation"]> } & DataProps<T>) {
+function EditButton<T extends Single<TableDataProps>>({ index, data, mutation, createSchema }: { index: number, mutation: NonNullable<Mutations["updateMutation"]> } & DataProps<T>) {
   const { register, handleSubmit } = useForm();
 
   // for partial updates

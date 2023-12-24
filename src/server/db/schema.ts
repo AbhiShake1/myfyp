@@ -10,7 +10,6 @@ import {
   timestamp,
   varchar,
   date,
-  bigint,
   mysqlEnum,
 } from "drizzle-orm/mysql-core";
 import { type AdapterAccount } from "next-auth/adapters";
