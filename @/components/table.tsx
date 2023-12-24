@@ -36,7 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
+import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { type DefaultInputProps, FYPInput } from "./input/fyp-input"
 import { type UseTRPCMutationResult } from "@trpc/react-query/shared"
@@ -45,18 +45,24 @@ type Single<T> = T extends Array<infer U> ? U : never;
 
 type TableDataProps = Record<string, string | number | null>[];
 
-export type CRUDTableProps<T, K> = {
-  data: T[];
-  createSchema: T extends Record<infer U, unknown> ? Record<U, DefaultInputProps> : never;
-  searchField?: K;
-  exclude?: K[];
+type Mutations = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createMutation?: UseTRPCMutationResult<any, any, any, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateMutation?: UseTRPCMutationResult<any, any, any, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deleteMutation?: UseTRPCMutationResult<any, any, any, unknown>;
-};
+}
+
+type DataProps<T> = {
+  data: T[];
+  createSchema: T extends Record<infer U, unknown> ? Record<U, DefaultInputProps> : never;
+}
+
+export type CRUDTableProps<T, K> = {
+  searchField?: K;
+  exclude?: K[];
+} & Mutations & DataProps<T>;
 
 function getKeys<K>(keys: string[], exclude?: K[]): string[] {
   if (!exclude) {
@@ -70,24 +76,6 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
-
-  const createSchema = React.useMemo(() => Object.entries(schema), [schema]);
-
-  const {
-    register: registerCreate,
-    handleSubmit: handleCreateSubmit
-  } = useForm();
-
-  const {
-    register: registerUpdate,
-    handleSubmit: handleUpdateSubmit
-  } = useForm();
-
-  // for partial updates
-  const updateSchema = React.useMemo(() => createSchema.map(s => ({
-    ...s,
-    required: false,
-  })), []);
 
   const columns: ColumnDef<Single<typeof data>>[] = React.useMemo(() => [
     {
@@ -133,57 +121,8 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
       cell: ({ row: { index } }) => {
         return (
           <div className="text-right">
-            {updateMutation &&
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button size="icon" variant="outline">
-                    <PencilIcon className="h-4 w-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Edit Item</SheetTitle>
-                  </SheetHeader>
-                  <form onSubmit={handleUpdateSubmit(e => updateMutation.mutate(e))}>
-                    <div className="grid gap-4 py-4">
-                      {updateSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...registerUpdate(s[0])} defaultValue={data[index]?.[s[0]] ?? ""} />)}
-                    </div>
-                    <SheetFooter>
-                      <Button type="submit">Save changes</Button>
-                    </SheetFooter>
-                  </form>
-                </SheetContent>
-              </Sheet>
-            }
-            {deleteMutation &&
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="ml-2 text-red-500" size="icon" variant="outline">
-                    <TrashIcon className="h-4 w-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Delete Item</DialogTitle>
-                  </DialogHeader>
-                  <div className="py-4">
-                    <p>Are you sure you want to delete this item?</p>
-                  </div>
-                  <DialogFooter className="flex justify-end gap-4">
-                    <div>
-                      <Button className="bg-gray-200 text-black px-4 py-2 rounded" type="button">
-                        Reconsider
-                      </Button>
-                    </div>
-                    <div>
-                      <Button className="bg-red-600 text-white px-4 py-2 rounded" type="button" onSubmit={deleteMutation.mutate}>
-                        Confirm Delete
-                      </Button>
-                    </div>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            }
+            {updateMutation && <EditButton index={index} data={data} createSchema={schema} mutation={updateMutation} />}
+            {deleteMutation && <DeleteButton mutation={deleteMutation} />}
           </div>
         )
       },
@@ -223,26 +162,7 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
               className="max-w-sm"
             />
           }
-          {createMutation && <Sheet>
-            <SheetTrigger>
-              <Button variant="default">Add New Item</Button>
-            </SheetTrigger>
-            <SheetContent side="left">
-              <SheetHeader>
-                <SheetTitle>
-                  Add Item
-                </SheetTitle>
-              </SheetHeader>
-              <form onSubmit={handleCreateSubmit(e => createMutation.mutate(e))}>
-                <div className="grid gap-4 py-4">
-                  {createSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...registerCreate(s[0])} />)}
-                </div>
-                <SheetFooter>
-                  <Button type="submit">Add Item</Button>
-                </SheetFooter>
-              </form>
-            </SheetContent>
-          </Sheet>}
+          {createMutation && <CreateButton mutation={createMutation} schema={schema} />}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -347,6 +267,94 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
       </div>
     </div>
   )
+}
+
+function CreateButton<T extends Single<TableDataProps>>({ mutation, schema }: { mutation: NonNullable<Mutations["deleteMutation"]>, schema: DataProps<T>["createSchema"] }) {
+  const createSchema = React.useMemo(() => Object.entries(schema), [schema]);
+
+  const { register, handleSubmit } = useForm();
+
+  return <Sheet>
+    <SheetTrigger>
+      <Button variant="default">Add New Item</Button>
+    </SheetTrigger>
+    <SheetContent side="left">
+      <SheetHeader>
+        <SheetTitle>
+          Add Item
+        </SheetTitle>
+      </SheetHeader>
+      <form onSubmit={handleSubmit(e => mutation.mutate(e))}>
+        <div className="grid gap-4 py-4">
+          {createSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...register(s[0])} />)}
+        </div>
+        <SheetFooter>
+          <Button type="submit">Add Item</Button>
+        </SheetFooter>
+      </form>
+    </SheetContent>
+  </Sheet>
+}
+
+function DeleteButton({ mutation }: { mutation: NonNullable<Mutations["deleteMutation"]> }) {
+  return <Dialog>
+    <DialogTrigger asChild>
+      <Button className="ml-2 text-red-500" size="icon" variant="outline">
+        <TrashIcon className="h-4 w-4" />
+      </Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Delete Item</DialogTitle>
+      </DialogHeader>
+      <div className="py-4">
+        <p>Are you sure you want to delete this item?</p>
+      </div>
+      <DialogFooter className="flex justify-end gap-4">
+        <div>
+          <Button className="bg-gray-200 text-black px-4 py-2 rounded" type="button">
+            Reconsider
+          </Button>
+        </div>
+        <div>
+          <Button className="bg-red-600 text-white px-4 py-2 rounded" onClick={mutation.mutate}>
+            Confirm Delete
+          </Button>
+        </div>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+}
+
+function EditButton<T extends Single<TableDataProps>>({ index, data, mutation, createSchema }: { index: number, mutation: NonNullable<Mutations["deleteMutation"]> } & DataProps<T>) {
+  const { register, handleSubmit } = useForm();
+
+  // for partial updates
+  const updateSchema = React.useMemo(() => Object.entries(createSchema).map(s => ({
+    ...s,
+    required: false,
+  })), [createSchema]);
+
+  return <Sheet>
+    <SheetTrigger asChild>
+      <Button size="icon" variant="outline">
+        <PencilIcon className="h-4 w-4" />
+      </Button>
+    </SheetTrigger>
+    <SheetContent>
+      <SheetHeader>
+        <SheetTitle>Edit Item</SheetTitle>
+      </SheetHeader>
+      <form onSubmit={handleSubmit(e => mutation.mutate(e))}>
+        <div className="grid gap-4 py-4">
+          {updateSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...register(s[0])} defaultValue={data[index]?.[s[0]] ?? ""} />)}
+        </div>
+        <SheetFooter>
+          <Button type="submit">Save changes</Button>
+        </SheetFooter>
+      </form>
+    </SheetContent>
+  </Sheet>
 }
 
 function ArrowLeftIcon(props: { className: string }) {
