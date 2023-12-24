@@ -130,7 +130,7 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
     {
       id: "actions",
       enableHiding: false,
-      cell: () => {
+      cell: ({ row: { index } }) => {
         return (
           <div className="text-right">
             {updateMutation &&
@@ -146,12 +146,10 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
                   </SheetHeader>
                   <form onSubmit={handleUpdateSubmit(e => updateMutation.mutate(e))}>
                     <div className="grid gap-4 py-4">
-                      {updateSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...registerUpdate(s[0])} />)}
+                      {updateSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...registerUpdate(s[0])} defaultValue={data[index]?.[s[0]] ?? ""} />)}
                     </div>
                     <SheetFooter>
-                      <SheetClose asChild>
-                        <Button type="submit">Save changes</Button>
-                      </SheetClose>
+                      <Button type="submit">Save changes</Button>
                     </SheetFooter>
                   </form>
                 </SheetContent>

@@ -23,7 +23,7 @@ export type DefaultInputProps = DefaultProps & Omit<InputProps, "type"> & (
 
 export const FYPInput = React.forwardRef<HTMLInputElement, DefaultInputProps>(
   ({ label, placeholder, type, ...rest }, ref) => {
-    const [val, setVal] = useState("");
+    const [val, setVal] = useState(rest.defaultValue ?? "");
 
     const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
       switch (type) {
