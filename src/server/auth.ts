@@ -126,12 +126,8 @@ export const authOptions: NextAuthOptions = {
             token.role = userFromDb[0]?.role;
           }
         }
-        if (trigger === "signUp") {
-
-          const existingUser = await db.query.users.findMany({ where: ({ email }, { eq }) => eq(email, token.email ?? "") });
-          if (existingUser.length === 0 && token.email) {
-            await db.insert(users).values({ email: token.email, name: token.name, image: token.picture });
-          }
+        if (trigger === "signUp" && token.email) {
+          await db.insert(users).values({ email: token.email, name: token.name, image: token.picture });
         }
       }
       return token;
