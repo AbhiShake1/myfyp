@@ -5,11 +5,12 @@ import { cookies } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { SessionProvider } from "~/providers/session";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "~/providers/theme";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from '@vercel/analytics/react';
 import Script from "next/script";
 import { OneTapSignin } from "~/hoc/one-tap-sign-in";
+import { ModeToggle } from "@/components/theme-mode-toggle";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <ThemeProvider attribute="class" defaultTheme="dark">
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <SessionProvider>
           <OneTapSignin>
             <body className={`font-sans ${inter.variable}`}>
@@ -37,6 +38,9 @@ export default function RootLayout({
                 <SpeedInsights />
                 <Analytics />
                 <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
+                <nav className="sticky top-0 backdrop-blur-lg py-4 px-8 border-b-primary-foreground border-b flex flex-row items-center justify-end">
+                  <ModeToggle />
+                </nav>
                 {children}
               </TRPCReactProvider>
             </body>
