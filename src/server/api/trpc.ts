@@ -109,7 +109,7 @@ const enforceUserIsAdmin = t.middleware(async ({ ctx, next }) => {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
-  const user = await ctx.db.query.users.findFirst({ where: ({ email }, { eq }) => eq(email, ctx.session!.user.email!) });
+  const user = await ctx.db.query.users.findFirst({ where: ({ email }, { eq }) => eq(email, ctx.session?.user.email ?? "") });
   if (!user || user.role !== "admin") {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }

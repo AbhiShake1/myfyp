@@ -24,8 +24,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      role?: "student" | "admin" | "staff" | null
     } & DefaultSession["user"];
   }
 
@@ -119,14 +118,28 @@ export const authOptions: NextAuthOptions = {
      */
   ],
   callbacks: {
-    async signIn({ user }) {
-      const existingUser = await db.query.users.findMany({ where: ({ email }, { eq }) => eq(email, user.email ?? "") });
-      if (existingUser.length === 0) {
-        await db.insert(users).values({ email: user.email!, name: user.name, image: user.image });
-      }
+    async jwt({ token, trigger }) {
+      if (token.email) {
+        if (!token.role) {
+          const userFromDb = await db.query.users.findMany({ where: ({ email }, { eq }) => eq(email, token.email!) });
+          if (userFromDb.length > 0) {
+            token.role = userFromDb[0]?.role;
+          }
+        }
+        if (trigger === "signUp") {
 
-      return true;
+          const existingUser = await db.query.users.findMany({ where: ({ email }, { eq }) => eq(email, token.email ?? "") });
+          if (existingUser.length === 0 && token.email) {
+            await db.insert(users).values({ email: token.email, name: token.name, image: token.picture });
+          }
+        }
+      }
+      return token;
     },
+    session({ session, token }) {
+      session.user.role = token.role;
+      return session;
+    }
   },
   session: { strategy: "jwt" },
 };

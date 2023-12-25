@@ -69,11 +69,11 @@ export async function HomePage() {
                   Build unlimited full-stack websites just with drag and drop and publish them for as long as you are subscribed.
                   Don't worry, you can still use the builder without subscription.
                 </p>
-                <Button>
-								<Link href="/builder">
-                  Try now for free
-								</Link>
-                </Button>
+                <Link href="/builder">
+                  <Button className="w-full">
+                    Try now for free
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>
