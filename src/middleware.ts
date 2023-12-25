@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   const { nextUrl: { pathname }, url } = request;
 
-  const token = await getToken({ req: request, secureCookie: true });
+  const token = await getToken({ req: request, secureCookie: process.env.NODE_ENV === "production" });
   if (!token) {
     if (pathname.startsWith("/login")) return NextResponse.next();
     return NextResponse.redirect(new URL("/login", request.url));
