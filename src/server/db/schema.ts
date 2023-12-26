@@ -21,7 +21,7 @@ const roles = mysqlEnum("roles", ["admin", "staff", "student"]).default("student
 
 export const users = fypTable("user", {
   name: varchar("name", { length: 255 }),
-  email: varchar("email", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).unique().notNull(),
   emailVerified: timestamp("emailVerified", {
     mode: "date",
     fsp: 3,
