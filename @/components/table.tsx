@@ -41,6 +41,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { type DefaultInputProps, FYPInput } from "./input/fyp-input"
 import { type UseTRPCMutationResult } from "@trpc/react-query/shared"
 import { type ExecutedQuery } from "@planetscale/database"
+import { toast } from "sonner"
 
 type Single<T> = T extends Array<infer U> ? U : never;
 
@@ -70,11 +71,12 @@ function getKeys<K>(keys: string[], exclude?: K[]): string[] {
   return keys.filter(k => !newExclude.includes(k as K));
 };
 
-export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({ data, exclude, searchField, createSchema: schema, createMutation, updateMutation, deleteMutation }: CRUDTableProps<T, K>) {
+export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({ data: initialData, exclude, searchField, createSchema: schema, createMutation, updateMutation, deleteMutation }: CRUDTableProps<T, K>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [data, setData] = React.useState(initialData)
 
   const columns: ColumnDef<Single<typeof data>>[] = React.useMemo(() => [
     {
@@ -121,7 +123,9 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
         const id = data[index]?.id?.toString() ?? ""
         return (
           <div className="text-right">
-            {updateMutation && <EditButton id={id} index={index} data={data} createSchema={schema} mutation={updateMutation} />}
+            {updateMutation && <EditButton onSuccess={(d) => {
+              setData(prev => prev.map(p => p.id === d.id ? { ...p, ...d } : p));
+            }} id={id} index={index} data={data} createSchema={schema} mutation={updateMutation} />}
             {deleteMutation && <DeleteButton mutation={deleteMutation} id={id} />}
           </div>
         )
@@ -326,9 +330,12 @@ function DeleteButton({ id, mutation }: { id: string, mutation: NonNullable<Muta
   </Dialog>
 }
 
-function EditButton<T extends Single<TableDataProps>>({ index, id, data, mutation, createSchema }: { index: number, id: string, mutation: NonNullable<Mutations["updateMutation"]> } & DataProps<T>) {
+function EditButton<T extends Single<TableDataProps>>({
+  index, id, data, mutation, createSchema, onSuccess,
+}: { index: number, id: string, onSuccess: (data: T) => void, mutation: NonNullable<Mutations["updateMutation"]> } & DataProps<T>) {
   const { register, handleSubmit } = useForm();
   const [loading, setLoading] = React.useState(false);
+  const [open, setOpen] = React.useState(false)
 
   // for partial updates
   const updateSchema = React.useMemo(() => Object.entries(createSchema).map(s => ({
@@ -336,20 +343,25 @@ function EditButton<T extends Single<TableDataProps>>({ index, id, data, mutatio
     required: false,
   })), [createSchema]);
 
-  return <Sheet>
-    <SheetTrigger asChild>
-      <Button size="icon" variant="outline">
-        <PencilIcon className="h-4 w-4" />
-      </Button>
-    </SheetTrigger>
+  return <Sheet open={open}>
+    <Button size="icon" variant="outline" onClick={() => setOpen(true)}>
+      <PencilIcon className="h-4 w-4" />
+    </Button>
     <SheetContent>
       <SheetHeader>
         <SheetTitle>Edit Item</SheetTitle>
       </SheetHeader>
       <form onSubmit={handleSubmit(async (e) => {
-				setLoading(true)
-        await mutation.mutateAsync({ ...e, id });
-				setLoading(false)
+        setLoading(true);
+        try {
+          await mutation.mutateAsync({ ...e, id });
+          setOpen(false)
+          toast.success("Success", { description: "Updated" });
+          onSuccess({ ...e, id } as T);
+        } catch (_) {
+          toast.error("Something went wrong", { description: "Failed to update" });
+        }
+        setLoading(false);
       })}>
         <div className="grid gap-4 py-4">
           {updateSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...register(s[0])} defaultValue={data[index]?.[s[0]] ?? ""} />)}

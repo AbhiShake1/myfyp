@@ -11,6 +11,7 @@ import { Analytics } from '@vercel/analytics/react';
 import Script from "next/script";
 import { OneTapSignin } from "~/hoc/one-tap-sign-in";
 import { ModeToggle } from "@/components/theme-mode-toggle";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -42,6 +43,7 @@ export default function RootLayout({
                   <ModeToggle />
                 </nav>
                 {children}
+                <Toaster />
               </TRPCReactProvider>
             </body>
           </OneTapSignin>
