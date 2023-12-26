@@ -328,6 +328,7 @@ function DeleteButton({ id, mutation }: { id: string, mutation: NonNullable<Muta
 
 function EditButton<T extends Single<TableDataProps>>({ index, id, data, mutation, createSchema }: { index: number, id: string, mutation: NonNullable<Mutations["updateMutation"]> } & DataProps<T>) {
   const { register, handleSubmit } = useForm();
+  const [loading, setLoading] = React.useState(false);
 
   // for partial updates
   const updateSchema = React.useMemo(() => Object.entries(createSchema).map(s => ({
@@ -345,12 +346,16 @@ function EditButton<T extends Single<TableDataProps>>({ index, id, data, mutatio
       <SheetHeader>
         <SheetTitle>Edit Item</SheetTitle>
       </SheetHeader>
-      <form onSubmit={handleSubmit(e => mutation.mutate({ ...e, id }))}>
+      <form onSubmit={handleSubmit(async (e) => {
+				setLoading(true)
+        await mutation.mutateAsync({ ...e, id });
+				setLoading(false)
+      })}>
         <div className="grid gap-4 py-4">
           {updateSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...register(s[0])} defaultValue={data[index]?.[s[0]] ?? ""} />)}
         </div>
         <SheetFooter>
-          <Button type="submit">Save changes</Button>
+          <Button isLoading={loading} type="submit">Save changes</Button>
         </SheetFooter>
       </form>
     </SheetContent>
