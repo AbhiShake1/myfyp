@@ -50,7 +50,7 @@ type Mutations = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createMutation?: UseTRPCMutationResult<ExecutedQuery, any, any, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  updateMutation?: UseTRPCMutationResult<ExecutedQuery, any, any, unknown>;
+  updateMutation?: UseTRPCMutationResult<ExecutedQuery, any, { id: string, [key: string]: string | number | null }, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deleteMutation?: UseTRPCMutationResult<ExecutedQuery, any, string, unknown>;
 }
@@ -118,10 +118,11 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
       id: "actions",
       enableHiding: false,
       cell: ({ row: { index } }) => {
+        const id = data[index]?.id?.toString() ?? ""
         return (
           <div className="text-right">
-            {updateMutation && <EditButton index={index} data={data} createSchema={schema} mutation={updateMutation} />}
-            {deleteMutation && <DeleteButton mutation={deleteMutation} id={data[index]?.id?.toString() ?? ""} />}
+            {updateMutation && <EditButton id={id} index={index} data={data} createSchema={schema} mutation={updateMutation} />}
+            {deleteMutation && <DeleteButton mutation={deleteMutation} id={id} />}
           </div>
         )
       },
@@ -325,7 +326,7 @@ function DeleteButton({ id, mutation }: { id: string, mutation: NonNullable<Muta
   </Dialog>
 }
 
-function EditButton<T extends Single<TableDataProps>>({ index, data, mutation, createSchema }: { index: number, mutation: NonNullable<Mutations["updateMutation"]> } & DataProps<T>) {
+function EditButton<T extends Single<TableDataProps>>({ index, id, data, mutation, createSchema }: { index: number, id: string, mutation: NonNullable<Mutations["updateMutation"]> } & DataProps<T>) {
   const { register, handleSubmit } = useForm();
 
   // for partial updates
@@ -344,7 +345,7 @@ function EditButton<T extends Single<TableDataProps>>({ index, data, mutation, c
       <SheetHeader>
         <SheetTitle>Edit Item</SheetTitle>
       </SheetHeader>
-      <form onSubmit={handleSubmit(e => mutation.mutate(e))}>
+      <form onSubmit={handleSubmit(e => mutation.mutate({ ...e, id }))}>
         <div className="grid gap-4 py-4">
           {updateSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...register(s[0])} defaultValue={data[index]?.[s[0]] ?? ""} />)}
         </div>
