@@ -50,7 +50,7 @@ type Mutations = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createMutation?: UseTRPCMutationResult<ExecutedQuery, any, any, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  updateMutation?: UseTRPCMutationResult<ExecutedQuery, any, { id: string, [key: string]: string | number | null }, unknown>;
+  updateMutation?: UseTRPCMutationResult<ExecutedQuery, any, { id: string, [key: string]: unknown }, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deleteMutation?: UseTRPCMutationResult<ExecutedQuery, any, string, unknown>;
 }
