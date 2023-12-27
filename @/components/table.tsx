@@ -167,7 +167,7 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
               className="max-w-sm"
             />
           }
-          {createMutation && <CreateButton mutation={createMutation} schema={schema} />}
+          {createMutation && <CreateButton data={data} mutation={createMutation} createSchema={schema} onSuccess={setData} deleteMutation={deleteMutation}/>}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -274,12 +274,18 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
   )
 }
 
-function CreateButton<T extends Single<TableDataProps>>({ mutation, schema }: { mutation: NonNullable<Mutations["createMutation"]>, schema: DataProps<T>["createSchema"] }) {
+function CreateButton<T extends Single<TableDataProps>>({
+  mutation, createSchema: schema, data, onSuccess,
+}: { mutation: NonNullable<Mutations["createMutation"]>, deleteMutation: Mutations["deleteMutation"], onSuccess: (data: T[]) => void } & DataProps<T>) {
   const createSchema = React.useMemo(() => Object.entries(schema), [schema]);
+  const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false)
 
   const { register, handleSubmit } = useForm();
 
-  return <Sheet>
+  const history = React.useMemo(() => UndoHistory.create(data), [data])
+
+  return <Sheet open={open} onOpenChange={setOpen}>
     <SheetTrigger>
       <Button variant="default">Add New Item</Button>
     </SheetTrigger>
@@ -289,12 +295,37 @@ function CreateButton<T extends Single<TableDataProps>>({ mutation, schema }: { 
           Add Item
         </SheetTitle>
       </SheetHeader>
-      <form onSubmit={handleSubmit(e => mutation.mutate(e))}>
+      <form onSubmit={handleSubmit(async e => {
+        try {
+          setLoading(true)
+          await mutation.mutateAsync(e)
+          onSuccess([e as T, ...data]);
+          toast.success("Success", {
+            description: "Updated",
+            action: {
+              label: "Undo",
+              onClick: () => {
+                const old = history.undo()!;
+                // deleteMutation.mutateAsync(id).then(() => {
+                //   onSuccess(old);
+                // }).catch(() => {
+                //   //
+                // });
+              },
+            },
+          });
+          setOpen(false);
+        } catch (_) {
+          toast.error("Something went wrong", { description: "Failed to add item" });
+        } finally {
+          setLoading(false)
+        }
+      })}>
         <div className="grid gap-4 py-4">
           {createSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...register(s[0])} />)}
         </div>
         <SheetFooter>
-          <Button type="submit">Add Item</Button>
+          <Button isLoading={loading} type="submit">Add Item</Button>
         </SheetFooter>
       </form>
     </SheetContent>
@@ -349,9 +380,11 @@ function EditButton<T extends Single<TableDataProps>>({
   }, [data, index]);
 
   return <Sheet open={open} onOpenChange={setOpen}>
-    <Button size="icon" variant="outline" onClick={() => setOpen(true)}>
-      <PencilIcon className="h-4 w-4" />
-    </Button>
+    <SheetTrigger>
+      <Button size="icon" variant="outline">
+        <PencilIcon className="h-4 w-4" />
+      </Button>
+    </SheetTrigger>
     <SheetContent>
       <SheetHeader>
         <SheetTitle>Edit Item</SheetTitle>
