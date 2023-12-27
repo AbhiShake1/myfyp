@@ -43,7 +43,7 @@ export default function RootLayout({
                   <ModeToggle />
                 </nav>
                 {children}
-                <Toaster />
+                <Toaster richColors />
               </TRPCReactProvider>
             </body>
           </OneTapSignin>
