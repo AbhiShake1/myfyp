@@ -116,7 +116,7 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
           </Button>
         )
       },
-      cell: ({ row }) => <div className="lowercase">{row.getValue(cell)}</div>,
+      cell: ({ row }) => <div>{row.getValue(cell)}</div>,
     })),
     {
       id: "actions",
