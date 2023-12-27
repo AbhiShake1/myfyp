@@ -56,8 +56,8 @@ const _Button = React.forwardRef<HTMLButtonElement, Omit<ButtonProps, "isLoading
 )
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ isLoading = false, disabled, children, ...props }) => {
-    return <_Button {...props} disabled={isLoading || disabled}>
+  ({ isLoading = false, disabled, children, ...props }, ref) => {
+    return <_Button {...props} disabled={isLoading || disabled} ref={ref}>
       {isLoading && <ShadowNoneIcon className="animate-spin pr-2" />}
       {children}
     </_Button>

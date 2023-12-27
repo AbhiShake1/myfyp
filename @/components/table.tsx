@@ -48,9 +48,9 @@ type Single<T> = T extends Array<infer U> ? U : never;
 
 type TableDataProps = { id: string, [key: string]: string | number | null }[];;
 
-type Mutations = {
+type Mutations<T> = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createMutation?: UseTRPCMutationResult<ExecutedQuery, any, any, unknown>;
+  createMutation?: UseTRPCMutationResult<T, any, any, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateMutation?: UseTRPCMutationResult<ExecutedQuery, any, { id: string, [key: string]: unknown }, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,7 +65,7 @@ type DataProps<T> = {
 export type CRUDTableProps<T, K> = {
   searchField?: K;
   exclude?: K[];
-} & Mutations & DataProps<T>;
+} & Mutations<T> & DataProps<T>;
 
 function getKeys<K>(keys: string[], exclude?: K[]): string[] {
   const newExclude = [...(exclude ?? []), "id"];
@@ -127,7 +127,7 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
             {updateMutation && <EditButton onSuccess={(d) => {
               setData(prev => prev.map(p => p.id === d.id ? { ...p, ...d } : p));
             }} id={id} index={index} data={data} createSchema={schema} mutation={updateMutation} />}
-            {deleteMutation && <DeleteButton mutation={deleteMutation} id={id} />}
+            {deleteMutation && <DeleteButton<T> mutation={deleteMutation} id={id} />}
           </div>
         )
       },
@@ -167,7 +167,7 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
               className="max-w-sm"
             />
           }
-          {createMutation && <CreateButton data={data} mutation={createMutation} createSchema={schema} onSuccess={setData} deleteMutation={deleteMutation}/>}
+          {createMutation && <CreateButton data={data} mutation={createMutation} createSchema={schema} onSuccess={setData} deleteMutation={deleteMutation} />}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -275,15 +275,19 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
 }
 
 function CreateButton<T extends Single<TableDataProps>>({
-  mutation, createSchema: schema, data, onSuccess,
-}: { mutation: NonNullable<Mutations["createMutation"]>, deleteMutation: Mutations["deleteMutation"], onSuccess: (data: T[]) => void } & DataProps<T>) {
+  mutation, createSchema: schema, data, onSuccess, deleteMutation,
+}: { mutation: NonNullable<Mutations<T>["createMutation"]>, deleteMutation: Mutations<T>["deleteMutation"], onSuccess: (data: T[]) => void } & DataProps<T>) {
   const createSchema = React.useMemo(() => Object.entries(schema), [schema]);
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false)
 
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, resetField } = useForm();
 
   const history = React.useMemo(() => UndoHistory.create(data), [data])
+
+  React.useEffect(() => {
+    if (!open) createSchema.forEach(s => resetField(s[0]));
+  }, [open])
 
   return <Sheet open={open} onOpenChange={setOpen}>
     <SheetTrigger>
@@ -298,19 +302,20 @@ function CreateButton<T extends Single<TableDataProps>>({
       <form onSubmit={handleSubmit(async e => {
         try {
           setLoading(true)
-          await mutation.mutateAsync(e)
+          const model = await mutation.mutateAsync(e)
+          history.setData(data);
           onSuccess([e as T, ...data]);
           toast.success("Success", {
             description: "Updated",
-            action: {
+            action: !deleteMutation ? undefined : {
               label: "Undo",
               onClick: () => {
                 const old = history.undo()!;
-                // deleteMutation.mutateAsync(id).then(() => {
-                //   onSuccess(old);
-                // }).catch(() => {
-                //   //
-                // });
+                deleteMutation.mutateAsync(model.id).then(() => {
+                  onSuccess(old);
+                }).catch(() => {
+                  //
+                });
               },
             },
           });
@@ -332,7 +337,7 @@ function CreateButton<T extends Single<TableDataProps>>({
   </Sheet>
 }
 
-function DeleteButton({ id, mutation }: { id: string, mutation: NonNullable<Mutations["deleteMutation"]> }) {
+function DeleteButton<T>({ id, mutation }: { id: string, mutation: NonNullable<Mutations<T>["deleteMutation"]> }) {
   return <Dialog>
     <DialogTrigger asChild>
       <Button className="ml-2 text-red-500" size="icon" variant="outline">
@@ -364,7 +369,7 @@ function DeleteButton({ id, mutation }: { id: string, mutation: NonNullable<Muta
 
 function EditButton<T extends Single<TableDataProps>>({
   index, id, data, mutation, createSchema, onSuccess,
-}: { index: number, id: string, onSuccess: (data: T) => void, mutation: NonNullable<Mutations["updateMutation"]> } & DataProps<T>) {
+}: { index: number, id: string, onSuccess: (data: T) => void, mutation: NonNullable<Mutations<T>["updateMutation"]> } & DataProps<T>) {
   const { register, handleSubmit } = useForm();
   const [loading, setLoading] = React.useState(false);
   const [open, setOpen] = React.useState(false)

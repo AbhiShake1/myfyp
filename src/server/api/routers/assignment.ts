@@ -14,8 +14,10 @@ export const assignmentRouter = createTRPCRouter({
   }),
   create: protectedProcedure
     .input(z.custom<AssignmentInsert>())
-    .mutation(({ ctx, input: assignment }) => {
-      return ctx.db.insert(assignments).values(assignment);
+    .mutation(async ({ ctx, input: assignment }) => {
+      await ctx.db.insert(assignments).values(assignment);
+      const data = await ctx.db.query.assignments.findFirst({ orderBy: ({ createdAt }, { desc }) => desc(createdAt), columns: { id: true, userId: true } });
+      return data!;
     }),
   update: protectedProcedure
     .input(z.custom<Partial<AssignmentInsert>>().and(z.object({ id: AssignmentID })))
