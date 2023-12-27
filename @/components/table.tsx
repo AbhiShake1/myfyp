@@ -42,6 +42,7 @@ import { type DefaultInputProps, FYPInput } from "./input/fyp-input"
 import { type UseTRPCMutationResult } from "@trpc/react-query/shared"
 import { type ExecutedQuery } from "@planetscale/database"
 import { toast } from "sonner"
+import { UndoHistory } from "~/utils/undo-history"
 
 type Single<T> = T extends Array<infer U> ? U : never;
 
@@ -343,6 +344,10 @@ function EditButton<T extends Single<TableDataProps>>({
     required: false,
   })), [createSchema]);
 
+  const history = React.useMemo(() => {
+    return UndoHistory.create({ ...data[index], id });
+  }, [data, index]);
+
   return <Sheet open={open}>
     <Button size="icon" variant="outline" onClick={() => setOpen(true)}>
       <PencilIcon className="h-4 w-4" />
@@ -355,8 +360,24 @@ function EditButton<T extends Single<TableDataProps>>({
         setLoading(true);
         try {
           await mutation.mutateAsync({ ...e, id });
-          setOpen(false)
-          toast.success("Success", { description: "Updated" });
+          setOpen(false);
+
+          history.setData({ ...e, id });
+
+          toast.success("Success", {
+            description: "Updated",
+            action: {
+              label: "Undo",
+              onClick: () => {
+                const old = history.undo() as T;
+                mutation.mutateAsync(old).then(() => {
+                  onSuccess(old);
+                }).catch(() => {
+                  //
+                });
+              },
+            },
+          });
           onSuccess({ ...e, id } as T);
         } catch (_) {
           toast.error("Something went wrong", { description: "Failed to update" });
