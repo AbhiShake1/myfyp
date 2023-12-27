@@ -348,7 +348,7 @@ function EditButton<T extends Single<TableDataProps>>({
     return UndoHistory.create({ ...data[index], id });
   }, [data, index]);
 
-  return <Sheet open={open}>
+  return <Sheet open={open} onOpenChange={setOpen}>
     <Button size="icon" variant="outline" onClick={() => setOpen(true)}>
       <PencilIcon className="h-4 w-4" />
     </Button>
@@ -381,8 +381,9 @@ function EditButton<T extends Single<TableDataProps>>({
           onSuccess({ ...e, id } as T);
         } catch (_) {
           toast.error("Something went wrong", { description: "Failed to update" });
+        } finally {
+          setLoading(false);
         }
-        setLoading(false);
       })}>
         <div className="grid gap-4 py-4">
           {updateSchema.map((s, i) => <FYPInput key={i} {...s[1]} {...register(s[0])} defaultValue={data[index]?.[s[0]] ?? ""} />)}
