@@ -12,6 +12,9 @@ import Script from "next/script";
 import { OneTapSignin } from "~/hoc/one-tap-sign-in";
 import { ModeToggle } from "@/components/theme-mode-toggle";
 import { Toaster } from "@/components/ui/sonner";
+import { ProfileAvatar } from "@/components/profile-avatar";
+import { getServerAuthSession } from "~/server/auth";
+import { LoginWithGoogleButton } from "@/components/login-with-google-button";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,11 +27,13 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerAuthSession();
+
   return (
     <html lang="en">
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -39,7 +44,8 @@ export default function RootLayout({
                 <SpeedInsights />
                 <Analytics />
                 <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
-                <nav className="sticky top-0 backdrop-blur-lg py-4 px-8 border-b-primary-foreground border-b flex flex-row items-center justify-end">
+                <nav className="sticky space-x-4 top-0 backdrop-blur-lg py-4 px-8 border-b-primary-foreground border-b flex flex-row items-center justify-end">
+                  {session ? <ProfileAvatar user={session} /> : <LoginWithGoogleButton className="w-fit" size="lg" variant="default" />}
                   <ModeToggle />
                 </nav>
                 {children}

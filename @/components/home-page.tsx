@@ -3,21 +3,13 @@
  * @see https://v0.dev/t/AMCM1RZZ7Cr
  */
 import { CardHeader, CardContent, Card } from "@/components/ui/card"
-import { LoginWithGoogleButton } from "./login-with-google-button"
-import { getServerAuthSession } from "~/server/auth"
 import { Button } from "./ui/button";
 import Link from "next/link";
 
 export async function HomePage() {
-  const session = await getServerAuthSession()
-  const showLogin = !session;
-
   return (
     <>
       <header className="flex h-20 w-full items-center px-4 md:px-6">
-        <div className="ml-auto">
-          {showLogin && <LoginWithGoogleButton size="lg" variant="default" />}
-        </div>
       </header>
       <main className="container mx-auto px-4 md:px-6">
         <section className="w-full py-12 md:py-24 lg:py-32">
