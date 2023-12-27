@@ -43,6 +43,7 @@ import { type UseTRPCMutationResult } from "@trpc/react-query/shared"
 import { type ExecutedQuery } from "@planetscale/database"
 import { toast } from "sonner"
 import { UndoHistory } from "~/utils/undo-history"
+import { DialogClose } from "@radix-ui/react-dialog"
 
 type Single<T> = T extends Array<infer U> ? U : never;
 
@@ -127,7 +128,7 @@ export function CRUDTable<T extends Single<TableDataProps>, K extends keyof T>({
             {updateMutation && <EditButton onSuccess={(d) => {
               setData(prev => prev.map(p => p.id === d.id ? { ...p, ...d } : p));
             }} id={id} index={index} data={data} createSchema={schema} mutation={updateMutation} />}
-            {deleteMutation && <DeleteButton<T> mutation={deleteMutation} id={id} />}
+            {deleteMutation && <DeleteButton<T> createMutation={createMutation} data={data} onSuccess={setData} mutation={deleteMutation} id={id} />}
           </div>
         )
       },
@@ -306,7 +307,7 @@ function CreateButton<T extends Single<TableDataProps>>({
           history.setData(data);
           onSuccess([e as T, ...data]);
           toast.success("Success", {
-            description: "Updated",
+            description: "Item Created",
             action: !deleteMutation ? undefined : {
               label: "Undo",
               onClick: () => {
@@ -337,8 +338,15 @@ function CreateButton<T extends Single<TableDataProps>>({
   </Sheet>
 }
 
-function DeleteButton<T>({ id, mutation }: { id: string, mutation: NonNullable<Mutations<T>["deleteMutation"]> }) {
-  return <Dialog>
+function DeleteButton<T extends { id: string }>({
+  id, mutation, data, onSuccess, createMutation,
+}: { id: string, mutation: NonNullable<Mutations<T>["deleteMutation"]>, createMutation: Mutations<T>["createMutation"], data: DataProps<T>["data"], onSuccess: (data: T[]) => void }) {
+  const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+
+  const history = React.useMemo(() => UndoHistory.create(data), [data]);
+
+  return <Dialog open={open} onOpenChange={setOpen}>
     <DialogTrigger asChild>
       <Button className="ml-2 text-red-500" size="icon" variant="outline">
         <TrashIcon className="h-4 w-4" />
@@ -353,12 +361,41 @@ function DeleteButton<T>({ id, mutation }: { id: string, mutation: NonNullable<M
       </div>
       <DialogFooter className="flex justify-end gap-4">
         <div>
-          <Button className="bg-gray-200 text-black px-4 py-2 rounded" type="button">
-            Reconsider
-          </Button>
+          <DialogClose>
+            <Button className="bg-gray-200 text-black px-4 py-2 rounded" type="button">
+              Cancel
+            </Button>
+          </DialogClose>
         </div>
         <div>
-          <Button className="bg-red-600 text-white px-4 py-2 rounded" onClick={() => mutation.mutate(id)}>
+          <Button isLoading={loading} className="bg-red-600 text-white px-4 py-2 rounded" onClick={async () => {
+            try {
+              setLoading(true);
+              await mutation.mutateAsync(id);
+              const updated = data.filter(d => d.id !== id);
+              history.setData(updated);
+              onSuccess(updated);
+              setOpen(false);
+              toast.success("Success", {
+                description: "Deleted",
+                action: !createMutation ? undefined : {
+                  label: "Undo",
+                  onClick: () => {
+                    const old = history.undo()!;
+                    console.log(old.length, data.length)
+                    createMutation.mutateAsync(old.find(o => o.id === id)).then(() => {
+                      onSuccess(old);
+                    }).catch(() => {
+                      //
+                    });
+                  },
+                },
+              });
+            } catch (_) {
+            } finally {
+              setLoading(false);
+            }
+          }}>
             Confirm Delete
           </Button>
         </div>
