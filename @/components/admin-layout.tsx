@@ -8,8 +8,11 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { usePathname } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { data: session } = useSession();
+
   const path = usePathname();
 
   const inactiveStyle = "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50";
@@ -19,22 +22,22 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const links = [
     {
       href: '/admin',
-			title: 'Home',
+      title: 'Home',
       icon: <HomeIcon className="h-4 w-4" />
     },
-    {
+    ...(session?.user.role !== "admin" ? [] : [{
       href: '/admin/staffs',
-			title: 'Staffs',
+      title: 'Staffs',
       icon: <UsersIcon className="h-4 w-4" />
-    },
+    }]),
     {
       href: '/admin/students',
-			title: 'Students',
+      title: 'Students',
       icon: <UsersIcon className="h-4 w-4" />
     },
     {
       href: '/admin/assignments',
-			title: 'Assignments',
+      title: 'Assignments',
       icon: <ActivityIcon className="h-4 w-4" />
     },
   ];
@@ -58,7 +61,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               {links.map(({ href, icon, title }) => {
                 return <Link key={href} className={path === href ? activeStyle : inactiveStyle} href={href}>
                   {icon}
-									{title}
+                  {title}
                 </Link>
               })}
             </nav>
@@ -93,7 +96,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 }
 
 
-function UsersIcon(props: {className: string}) {
+function UsersIcon(props: { className: string }) {
   return (
     <svg
       {...props}
@@ -116,7 +119,7 @@ function UsersIcon(props: {className: string}) {
 }
 
 
-function SchoolIcon(props: {className: string}) {
+function SchoolIcon(props: { className: string }) {
   return (
     <svg
       {...props}
@@ -141,7 +144,7 @@ function SchoolIcon(props: {className: string}) {
 }
 
 
-function ActivityIcon(props: {className: string}) {
+function ActivityIcon(props: { className: string }) {
   return (
     <svg
       {...props}
@@ -161,7 +164,7 @@ function ActivityIcon(props: {className: string}) {
 }
 
 
-function BellIcon(props: {className: string}) {
+function BellIcon(props: { className: string }) {
   return (
     <svg
       {...props}
@@ -182,7 +185,7 @@ function BellIcon(props: {className: string}) {
 }
 
 
-function HomeIcon(props: {className: string}) {
+function HomeIcon(props: { className: string }) {
   return (
     <svg
       {...props}
@@ -203,7 +206,7 @@ function HomeIcon(props: {className: string}) {
 }
 
 
-function SearchIcon(props: {className: string}) {
+function SearchIcon(props: { className: string }) {
   return (
     <svg
       {...props}
