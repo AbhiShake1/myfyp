@@ -5,8 +5,11 @@
 import { CardHeader, CardContent, Card } from "@/components/ui/card"
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { getServerAuthSession } from "~/server/auth";
 
 export async function HomePage() {
+  const session = await getServerAuthSession();
+
   return (
     <>
       <header className="flex h-20 w-full items-center px-4 md:px-6">
@@ -68,6 +71,21 @@ export async function HomePage() {
                 </Link>
               </CardContent>
             </Card>
+            {
+              session?.user.role === "staff" || session?.user.role === "admin" &&
+              <Card>
+                <CardHeader>
+                  <h2 className="text-2xl font-semibold">Manage your work</h2>
+                </CardHeader>
+                <CardContent className="flex flex-col">
+                  <Link href="/admin">
+                    <Button className="w-full">
+                      Go to dashboard
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            }
           </div>
         </section>
       </main>
